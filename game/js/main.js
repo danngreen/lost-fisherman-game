@@ -55,7 +55,7 @@ const Game = {
     this.timers = this.timers.filter(tm => tm.t > 0);
     due.forEach(tm => tm.res());
 
-    if (Input.pressed('mute') && S) { S.sound = !S.sound; Sound.setEnabled(S.sound); Toast.show('Sound ' + (S.sound ? 'on' : 'off')); }
+    if (Input.pressed('mute') && S) { S.sound = !Sound.enabled; Sound.setEnabled(S.sound); Toast.show('Sound ' + (S.sound ? 'on' : 'off')); }
     if (Input.pressed('fullscreen')) toggleFullscreen();
 
     Sound.update(dt);
@@ -309,8 +309,8 @@ const TitleScene = {
     this.t = 0;
     this.sel = 0;
     this.save = Save.read();
-    this.items = this.save && !this.save.f.ended ? ['Continue', 'New Game', 'Controls'] : ['New Game', 'Controls'];
-    if (this.save && this.save.f.ended) this.items = ['New Game', 'Controls'];
+    this.items = this.save && !this.save.f.ended ? ['Continue', 'New Game', 'Sound', 'Controls'] : ['New Game', 'Sound', 'Controls'];
+    if (this.save && this.save.f.ended) this.items = ['New Game', 'Sound', 'Controls'];
     if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.quit) this.items.push('Quit');
     this.clouds = this.clouds || new CloudLayer(5, 7, 30, 100, 0.2, 'fair');
     Sound.setMood('night');
@@ -326,7 +326,7 @@ const TitleScene = {
     if (Input.pressed('act')) {
       Sound.sfx('select');
       const it = this.items[this.sel];
-      if (it === 'Continue') { S = this.save; Sound.setEnabled(S.sound); Game.goto(Game.scenes[S.loc] instanceof Place ? S.loc : 'village', { banner: true }); }
+      if (it === 'Continue') { S = this.save; Sound.setEnabled(S.sound); Sound.setVolumes(S.musicVol, S.sfxVol); Game.goto(Game.scenes[S.loc] instanceof Place ? S.loc : 'village', { banner: true }); }
       if (it === 'New Game') {
         if (this.save && !this.save.f.ended) {
           Game.run(async () => {
@@ -336,6 +336,7 @@ const TitleScene = {
         } else { Save.clear(); S = newState(); Game.goto('intro'); }
       }
       if (it === 'Controls') Game.run(showControls);
+      if (it === 'Sound') Game.run(openSettings);
       if (it === 'Quit') window.webkit.messageHandlers.quit.postMessage(1);
     }
   },
@@ -428,8 +429,9 @@ function boot() {
   initIcons();
   S = newState();
   const pre = Save.read();
-  if (pre) { S.sound = pre.sound; }
+  if (pre) { S.sound = pre.sound; S.musicVol = pre.musicVol; S.sfxVol = pre.sfxVol; }
   Sound.enabled = S.sound !== false;
+  Sound.setVolumes(S.musicVol !== undefined ? S.musicVol : 6, S.sfxVol !== undefined ? S.sfxVol : 8);
   Game.scenes.title = TitleScene;
   Game.scenes.intro = IntroScene;
   registerPlaces();

@@ -157,6 +157,12 @@ const Menu = {
     if (Input.pressed('down')) { m.sel = (m.sel + 1) % n; Sound.sfx('blip'); }
     if (m.sel < m.scroll) m.scroll = m.sel;
     if (m.sel >= m.scroll + m.rows) m.scroll = m.sel - m.rows + 1;
+    const cur = m.items[m.sel];
+    if (cur && cur.adjust) {
+      if (Input.pressed('left')) { cur.adjust(-1); return; }
+      if (Input.pressed('right')) { cur.adjust(1); return; }
+      if (Input.pressed('act')) { cur.adjust(0); return; }
+    }
     if (Input.pressed('act')) {
       const it = m.items[m.sel];
       if (it && it.disabled) { Sound.sfx('back'); if (it.whyNot) Toast.show(it.whyNot); return; }
@@ -189,8 +195,12 @@ const Menu = {
       lx += 9;
       if (it.icon) { drawItemIcon(c, it.icon, lx, ry + 1); lx += 11; }
       const col = it.disabled ? '#6a7080' : sel ? UIC.hi : UIC.text;
-      drawText(c, it.label, lx, ry + 1, col);
-      if (it.right !== undefined) drawText(c, String(it.right), x + w - 12, ry + 1, it.disabled ? '#6a7080' : UIC.dim, { align: 'right' });
+      drawText(c, typeof it.label === 'function' ? it.label() : it.label, lx, ry + 1, col);
+      if (it.level !== undefined) {
+        const v = it.level(), bx = x + w - 12 - VOL_STEPS * 6;
+        if (sel) { drawText(c, '\u2190', bx - 10, ry + 1, UIC.hi); drawText(c, '\u2192', bx + VOL_STEPS * 6 + 1, ry + 1, UIC.hi); }
+        for (let k = 0; k < VOL_STEPS; k++) rect(c, bx + k * 6, ry + 2 + (k < v ? 0 : 3), 5, k < v ? 7 : 2, k < v ? (sel ? UIC.hi : UIC.text) : '#4a5268');
+      } else if (it.right !== undefined) drawText(c, String(it.right), x + w - 12, ry + 1, it.disabled ? '#6a7080' : UIC.dim, { align: 'right' });
     }
     if (m.scroll > 0) drawText(c, '↑', x + w - 12, y + 8, UIC.dim);
     if (m.scroll + rows < m.items.length) drawText(c, '↓', x + w - 12, y + hh - 34, UIC.dim);
@@ -336,7 +346,7 @@ async function openPause() {
       { label: 'Resume' },
       { label: 'Bag' },
       { label: 'Journal' },
-      { label: 'Sound: ' + (S.sound ? 'On' : 'Off'), desc: 'Press M at any time to toggle sound.' },
+      { label: 'Sound settings', desc: 'Music and sound effect volume. Press M at any time to mute.' },
       { label: 'Toggle Fullscreen', desc: 'Or press F.' },
       { label: 'Controls', desc: 'Show the controls.' },
       { label: 'Save & return to title' },
@@ -345,11 +355,37 @@ async function openPause() {
     if (i <= 0) return;
     if (i === 1) await openInventory();
     if (i === 2) await openJournal();
-    if (i === 3) { S.sound = !S.sound; Sound.setEnabled(S.sound); }
+    if (i === 3) await openSettings();
     if (i === 4) toggleFullscreen();
     if (i === 5) await showControls();
     if (i === 6) { Save.write(); Game.goto('title'); return; }
   }
+}
+
+async function openSettings() {
+  const store = () => {
+    // On the title screen the live state is a blank placeholder: update the real save instead.
+    const target = Game.sceneId === 'title' ? TitleScene.save : S;
+    if (!target) return;
+    target.musicVol = Sound.musicVol; target.sfxVol = Sound.sfxVol; target.sound = Sound.enabled;
+    const live = S; S = target; Save.write(); S = live;
+  };
+  const items = [
+    {
+      label: 'Music', level: () => Sound.musicVol, desc: 'Left / Right to change the music volume.',
+      adjust: d => { Sound.setVolumes(d === 0 ? (Sound.musicVol + 1) % (VOL_STEPS + 1) : Sound.musicVol + d, undefined); store(); },
+    },
+    {
+      label: 'Sound effects', level: () => Sound.sfxVol, desc: 'Left / Right to change the volume of the sea, wind and effects.',
+      adjust: d => { Sound.setVolumes(undefined, d === 0 ? (Sound.sfxVol + 1) % (VOL_STEPS + 1) : Sound.sfxVol + d); Sound.sfx('coin'); store(); },
+    },
+    {
+      label: () => 'Mute everything: ' + (Sound.enabled ? 'Off' : 'On'), desc: 'Press M at any time to mute or unmute.',
+      adjust: () => { Sound.setEnabled(!Sound.enabled); if (S) S.sound = Sound.enabled; store(); },
+    },
+    { label: 'Done' },
+  ];
+  await Menu.list({ title: 'Sound', items, w: 240, footer: true });
 }
 
 async function showControls() {

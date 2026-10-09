@@ -49,7 +49,8 @@ function newState() {
     stats: { fish: 0, caught: {}, startedAt: Date.now() },
     daily: { day: 1, palms: [1, 1, 1], oysters: [1, 1, 1] },
     hull: 3,
-    sound: true,
+    sound: Sound.enabled !== false,
+    musicVol: Sound.musicVol, sfxVol: Sound.sfxVol,
   };
 }
 
