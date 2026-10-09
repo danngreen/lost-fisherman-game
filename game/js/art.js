@@ -838,7 +838,8 @@ function drawHouse(c, x, gy, o) {
 function drawPalm(c, x, gy, h, t, o) {
   o = o || {};
   const lean = o.lean || 0.25;
-  const sway = Math.sin(t * 0.9 + x * 0.1) * 1.2;
+  const seed = o.seed !== undefined ? o.seed : 0;
+  const sway = Math.sin(t * 0.9 + seed * 0.1) * 1.2;
   let tx = x, ty = gy;
   const segs = Math.floor(h / 3);
   for (let i = 0; i < segs; i++) {
@@ -853,7 +854,7 @@ function drawPalm(c, x, gy, h, t, o) {
   // fronds
   const fr = o.fronds || 7;
   for (let f = 0; f < fr; f++) {
-    const a = -Math.PI / 2 + (f / (fr - 1) - 0.5) * 2.9 + Math.sin(t * 1.3 + f + x) * 0.06;
+    const a = -Math.PI / 2 + (f / (fr - 1) - 0.5) * 2.9 + Math.sin(t * 1.3 + f + seed) * 0.06;
     const len = 18 + (f % 2) * 5;
     for (let s = 0; s < len; s++) {
       const u = s / len;
@@ -879,7 +880,7 @@ function drawTree(c, x, gy, h, t, o) {
   rect(c, x - 2, gy - h * 0.55, 4, h * 0.55, trunk);
   rect(c, x - 1, gy - h * 0.55, 1, h * 0.55, shade(trunk, 1.2));
   rect(c, x - 3, gy - 2, 6, 2, trunk);
-  const r = RNG(Math.floor(x));
+  const r = RNG(Math.floor(o.seed !== undefined ? o.seed : 1) + 1);
   const leaf = o.leaf || ['#2a5a2a', '#3a7034', '#4f8a40'];
   for (let i = 0; i < 9; i++) {
     const bx = x + (r() - 0.5) * h * 0.6 + Math.sin(t + i) * 0.5, by = gy - h * 0.6 - r() * h * 0.35;
@@ -898,7 +899,7 @@ function drawGull(c, x, y, t, o) {
     px(c, x - 1, y - 1, '#e8a830'); px(c, x + 1, y - 1, '#e8a830');
     return;
   }
-  const f = Math.sin(t * 8 + x) > 0;
+  const f = Math.sin(t * 8 + (o.seed || 0)) > 0;
   const col = o.col || '#f0f0f0';
   if (f) { px(c, x - 2, y - 1, col); px(c, x - 1, y, col); px(c, x, y, col); px(c, x + 1, y, col); px(c, x + 2, y - 1, col); }
   else { px(c, x - 2, y + 1, col); px(c, x - 1, y, col); px(c, x, y, col); px(c, x + 1, y, col); px(c, x + 2, y + 1, col); }

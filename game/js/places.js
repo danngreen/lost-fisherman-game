@@ -695,7 +695,7 @@ const GULL = {
     for (const gx of [150, 214, 330, 470]) drawGull(w, gx - cam + Math.round(Math.sin(t * 0.5 + gx) * 2), this.ground(gx), t, { standing: true });
     for (let i = 0; i < 6; i++) {
       const a = t * (0.4 + i * 0.05) + i;
-      drawGull(w, 280 - cam + Math.cos(a) * (60 + i * 15), 70 + Math.sin(a) * 18 + i * 6, t + i);
+      drawGull(w, 280 - cam + Math.cos(a) * (60 + i * 15), 70 + Math.sin(a) * 18 + i * 6, t + i, { seed: i * 2.1 });
     }
     if (Math.random() < 0.004) Sound.sfx('gull');
   },
@@ -891,11 +891,11 @@ const COCONUT = {
   },
   drawMid(w, sc, cam, t) {
     if (S.boat) drawBoat(w, boatCfg(), 50 - cam, 239, t, {});
-    PALM_X.forEach((x, i) => drawPalm(w, x - cam, this.ground(x), 54 + (i % 2) * 10, t, { coconuts: S.daily.palms[i] ? 3 : 0, lean: i === 1 ? -0.2 : 0.25 }));
+    PALM_X.forEach((x, i) => drawPalm(w, x - cam, this.ground(x), 54 + (i % 2) * 10, t, { coconuts: S.daily.palms[i] ? 3 : 0, lean: i === 1 ? -0.2 : 0.25, seed: x }));
     IRON_X.forEach((x, i) => {
       const gy = this.ground(x);
       if (flag('iw' + i)) { rect(w, x - 4 - cam, gy - 5, 9, 5, '#3a2a1e'); rect(w, x - 3 - cam, gy - 6, 7, 1, '#c8a878'); }
-      else drawTree(w, x - cam, gy, 62, t * 0.3, { trunk: '#2a1e18', leaf: ['#1e3a24', '#2a4a2e', '#3a5e3a'] });
+      else drawTree(w, x - cam, gy, 62, t * 0.3, { trunk: '#2a1e18', leaf: ['#1e3a24', '#2a4a2e', '#3a5e3a'], seed: x });
     });
     // fire
     const fx = 552 - cam, fy = this.ground(552);

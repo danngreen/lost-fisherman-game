@@ -169,7 +169,7 @@ function drawChartIcon(c, kind, x, y, t) {
 // ---------------- silhouettes on the horizon ----------------
 function drawSilhouette(c, kind, x, horizon, col, t) {
   x = Math.round(x);
-  const hump = (w, hgt, cx) => { for (let i = 0; i < w; i++) { const u = i / w; const hh = Math.round(Math.pow(Math.sin(u * Math.PI), 0.7) * hgt + (hash1(i + cx) - 0.5) * 2); rect(c, cx + i - w / 2, horizon - hh, 1, hh, col); } };
+  const hump = (w, hgt, cx) => { for (let i = 0; i < w; i++) { const u = i / w; const hh = Math.round(Math.pow(Math.sin(u * Math.PI), 0.7) * hgt + (hash1(i + w * 7) - 0.5) * 2); rect(c, cx + i - w / 2, horizon - hh, 1, hh, col); } };
   if (kind === 'town') {
     hump(160, 18, x);
     for (let i = 0; i < 9; i++) { const hx = x - 50 + i * 11, hh = 6 + (i * 7) % 5; rect(c, hx, horizon - 18 - hh + Math.abs(i - 4), 8, hh, col); }
@@ -484,7 +484,7 @@ const VoyageScene = {
         const ph = (t * 0.6 + i * 0.27) % 1;
         const gx = x - 40 + i * 25 + Math.sin(t + i) * 8;
         const gy = ph < 0.7 ? 150 + Math.sin(t * 1.5 + i) * 5 + 20 : 170 + (ph - 0.7) / 0.3 * 40;
-        drawGull(w, gx, gy, t);
+        drawGull(w, gx, gy, t, { seed: i * 1.7 });
       }
     } else if (e.k === 'dolphins') {
       for (let i = 0; i < 3; i++) {
