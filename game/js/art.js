@@ -49,6 +49,7 @@ function skyColors(h, weather) {
   if (weather === 'fog') { wc = mixRgb('#8e979f', '#161b22', nf); wt = 0.78; }
   else if (weather === 'storm') { wc = mixRgb('#4d5866', '#0b0e15', nf); wt = 0.72; }
   else if (weather === 'cloudy') { wc = mixRgb('#a3adb8', '#141922', nf); wt = 0.35; }
+  else if (weather === 'snow') { wc = mixRgb('#c4ced8', '#161c26', nf); wt = 0.55; }
   if (wc) cols = cols.map(c => mixRgb(c, wc, wt));
   return cols;
 }
@@ -56,7 +57,7 @@ function skyColors(h, weather) {
 function worldTint(h, weather) {
   const [a, b, t] = keyAt(TINT_KEYS, h);
   let col = mixRgb(a[1], b[1], t), al = lerp(a[2], b[2], t);
-  const wt = weather === 'fog' ? ['#9aa3ab', 0.22] : weather === 'storm' ? ['#1e2a3a', 0.36] : weather === 'cloudy' ? ['#8a96a4', 0.1] : null;
+  const wt = weather === 'fog' ? ['#9aa3ab', 0.22] : weather === 'storm' ? ['#1e2a3a', 0.36] : weather === 'cloudy' ? ['#8a96a4', 0.1] : weather === 'snow' ? ['#c8d6e4', 0.14] : null;
   if (wt) { col = mixRgb(wt[0], col, clamp(al / 0.6, 0, 1)); al = Math.max(al, wt[1]); }
   return { col: rgbStr(col), a: al };
 }
@@ -96,7 +97,7 @@ const Sky = {
   draw(c, h, weather, horizon, t) {
     c.drawImage(this.render(h, weather, horizon), 0, 0);
     const nf = nightFactor(h);
-    const vis = weather === 'fog' ? 0.05 : weather === 'storm' ? 0 : weather === 'cloudy' ? 0.5 : 1;
+    const vis = weather === 'fog' ? 0.05 : weather === 'storm' ? 0 : weather === 'cloudy' || weather === 'snow' ? 0.4 : 1;
     if (nf > 0.05 && vis > 0) {
       for (const s of this.stars) {
         if (s.y > horizon - 6) continue;
@@ -107,6 +108,7 @@ const Sky = {
         if (s.b > 0.92) { c.fillRect((s.x | 0) - 1, s.y | 0, 3, 1); c.fillRect(s.x | 0, (s.y | 0) - 1, 1, 3); }
       }
     }
+    if (weather === 'aurora' && typeof drawAurora === 'function') drawAurora(c, t, horizon, Math.max(0.25, nf) * (0.6 + 0.4 * Math.sin(t * 0.13)));
     if (weather === 'storm') return;
     // sun
     const st = (h - 5.8) / 13.4;
@@ -389,7 +391,7 @@ function drawPerson(c, p, x, gy, o) {
 
 // ---------------- boats ----------------
 const _boatCache = {};
-function boatKey(cfg) { return [cfg.type, cfg.iron ? 1 : 0, cfg.lantern ? 1 : 0, cfg.color || ''].join('|'); }
+function boatKey(cfg) { return [cfg.type, cfg.iron ? 1 : 0, cfg.lantern ? 1 : 0, cfg.iceBow ? 1 : 0, cfg.color || ''].join('|'); }
 
 // returns {c, wl (waterline y in canvas), bowX, len, mastTop, lanternPos, seat}
 function makeBoat(cfg) {
@@ -489,6 +491,15 @@ function makeBoat(cfg) {
     // broken mast stub
     rect(x, ox + Math.round(L * 0.45), oy - 9, 2, 9, '#5a3c22');
     px(x, ox + Math.round(L * 0.45) + 1, oy - 10, '#5a3c22');
+  }
+  if (cfg.iceBow) {
+    // steel-shod ice-breaking stem
+    for (let i = L - 12; i < L; i++) {
+      const u = (i - L * 0.5) / (L * 0.5);
+      const top = oy + Math.round(-u * u * 3) + 2;
+      const bot = oy + HH - Math.round(Math.pow(u, 2.2) * (HH - 1));
+      for (let y = top; y < bot; y++) { x.fillStyle = (y + i) % 5 === 0 ? '#c8d0d8' : '#8a949e'; x.fillRect(ox + i, y, 1, 1); }
+    }
   }
   if (cfg.lantern) {
     const lx = ox + L - 4, ly = oy - 10;
@@ -938,25 +949,28 @@ function drawNet(c, x, y, w, h) {
 }
 
 // ---------------- whale ----------------
-let _whale = null;
-function whaleSprite() {
-  if (_whale) return _whale;
-  const L = 280, HH = 84;
+const _whales = {};
+// s = size (1 = the great whale, ~0.42 = her calf)
+function whaleSprite(s) {
+  s = s || 1;
+  if (_whales[s]) return _whales[s];
+  const L = Math.round(280 * s), HH = Math.round(84 * s) + 4;
   const [c, x] = makeCanvas(L, HH);
-  const cy = 40;
+  const cy = Math.round(40 * s) + 2;
   const spots = [];
-  for (let i = 18; i < L - 4; i++) {
+  for (let i = Math.round(18 * s); i < L - 2; i++) {
     const u = i / L;
     let th;
     if (u < 0.3) th = lerp(4, 28, Math.pow(Math.max(0, (u - 0.06) / 0.24), 1.2));
     else if (u < 0.85) th = lerp(28, 32, (u - 0.3) / 0.55);
     else th = 32 * Math.sqrt(Math.max(0, 1 - Math.pow((u - 0.85) / 0.155, 2)));
-    th = Math.max(2, th);
-    const top = cy - th * 0.62, bot = cy + th * 0.5 + (u > 0.55 ? (u - 0.55) * 12 : 0);
+    th = Math.max(2, th * s * (s < 1 ? 1.12 : 1));
+    const top = cy - th * 0.62, bot = cy + th * 0.5 + (u > 0.55 ? (u - 0.55) * 12 * s : 0);
     for (let y = Math.floor(top); y <= bot; y++) {
       const v = (y - top) / (bot - top);
       let col;
-      if (v < 0.05) col = '#8ab8cc';
+      if (s < 1 && v >= 0.05 && v < 0.58) col = hash2(i, y) > 0.9 ? '#7a9ab8' : '#5a7896';
+      else if (v < 0.05) col = '#8ab8cc';
       else if (v < 0.12) col = '#4a6a86';
       else if (v < 0.58) col = hash2(i, y) > 0.96 ? '#5a7a98' : '#3a5470';
       else if (v < 0.66) col = '#58708a';
@@ -964,45 +978,49 @@ function whaleSprite() {
       if (v < 0.5 && v > 0.05 && hash2(Math.floor(i / 3), Math.floor(y / 2)) > 0.93) col = '#7a94aa';
       px(x, i, y, col);
     }
-    if (i % 9 === 0 && u > 0.15 && u < 0.88) spots.push({ x: i, y: Math.round(top + th * 0.35 + (hash1(i) - 0.5) * 6), p: hash1(i) * 6.28 });
+    if (i % Math.max(4, Math.round(9 * s)) === 0 && u > 0.15 && u < 0.88) spots.push({ x: i, y: Math.round(top + th * 0.35 + (hash1(i) - 0.5) * 6 * s), p: hash1(i) * 6.28 });
   }
   // tail fluke
-  for (let j = -22; j <= 22; j++) {
-    const w = Math.round(20 * (1 - Math.abs(j) / 23) + (Math.abs(j) > 14 ? -3 : 0));
-    rect(x, 4 + (22 - Math.abs(j)) * 0.4, cy + j - 5, w, 1, Math.abs(j) < 3 ? '#2c4058' : '#3a5470');
+  const F = Math.round(22 * s);
+  for (let j = -F; j <= F; j++) {
+    const w = Math.round(20 * s * (1 - Math.abs(j) / (F + 1)) + (Math.abs(j) > F * 0.65 ? -3 * s : 0));
+    rect(x, 4 * s + (F - Math.abs(j)) * 0.4, cy + j - 5 * s, Math.max(1, w), 1, Math.abs(j) < 3 ? '#2c4058' : '#3a5470');
   }
-  rect(x, 18, cy - 5, 12, 8, '#3a5470');
+  rect(x, 18 * s, cy - 5 * s, 12 * s, 8 * s, '#3a5470');
   // pectoral fin
-  for (let k = 0; k < 56; k++) {
-    const fx = Math.round(L * 0.66 - k * 0.9), fy = Math.round(cy + 14 + k * 0.45);
-    rect(x, fx, fy, 7 - Math.floor(k / 12), 2, k % 6 === 0 ? '#9ab0bc' : '#7a92a2');
+  const FK = Math.round(56 * s);
+  for (let k = 0; k < FK; k++) {
+    const fx = Math.round(L * 0.66 - k * 0.9), fy = Math.round(cy + 14 * s + k * 0.45);
+    rect(x, fx, fy, Math.max(2, Math.round((7 - Math.floor(k / 12)) * s)), 2, k % 6 === 0 ? '#9ab0bc' : '#7a92a2');
   }
   // eye
-  rect(x, Math.round(L * 0.86), cy + 3, 3, 3, '#0a0e14');
-  px(x, Math.round(L * 0.86), cy + 3, '#a8e8ff');
-  // mouth line
-  for (let i = Math.round(L * 0.78); i < L - 6; i++) px(x, i, cy + 8 + Math.round((i - L * 0.78) * 0.08), '#14202e');
-  _whale = { c, spots, L, HH, cy };
-  return _whale;
+  const es = s < 1 ? 2 : 3;
+  rect(x, Math.round(L * 0.86), cy + 3 * s, es, es, '#0a0e14');
+  px(x, Math.round(L * 0.86), cy + 3 * s, '#a8e8ff');
+  for (let i = Math.round(L * 0.78); i < L - 6 * s; i++) px(x, i, cy + 8 * s + Math.round((i - L * 0.78) * 0.08), '#14202e');
+  _whales[s] = { c, spots, L, HH, cy };
+  return _whales[s];
 }
 function drawWhale(c, x, y, t, glow, o) {
   o = o || {};
-  const w = whaleSprite();
+  const w = whaleSprite(o.s);
   const img = o.left ? flipH(w.c) : w.c;
   c.drawImage(img, Math.round(x), Math.round(y));
   return w;
 }
 function whaleSpots(c, x, y, t, glow, o) {
   o = o || {};
-  const w = whaleSprite();
-  for (const s of w.spots) {
+  const w = whaleSprite(o.s);
+  const r = o.s && o.s < 1 ? 5 : 7;
+  w.spots.forEach((s, i) => {
+    if (o.lit !== undefined && i >= o.lit) return;
     const sx = o.left ? x + w.L - s.x : x + s.x;
     const a = glow * (0.55 + 0.45 * Math.sin(t * 1.7 + s.p));
-    if (a < 0.05) continue;
+    if (a < 0.05) return;
     c.globalAlpha = a;
-    c.drawImage(glowSprite(7, s.p > 3 ? '#7ff7e8' : '#9cffb0', 3, 0.9), Math.round(sx - 7), Math.round(y + s.y - 7));
+    c.drawImage(glowSprite(r, s.p > 3 ? '#7ff7e8' : '#9cffb0', 3, 0.9), Math.round(sx - r), Math.round(y + s.y - r));
     c.globalAlpha = Math.min(1, a + 0.3);
     rect(c, sx - 1, y + s.y - 1, 2, 2, '#e8fff8');
-  }
+  });
   c.globalAlpha = 1;
 }

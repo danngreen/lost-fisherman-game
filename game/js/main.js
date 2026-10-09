@@ -55,7 +55,7 @@ const Game = {
     this.timers = this.timers.filter(tm => tm.t > 0);
     due.forEach(tm => tm.res());
 
-    if (Input.pressed('mute') && S) { S.sound = !Sound.enabled; Sound.setEnabled(S.sound); Toast.show('Sound ' + (S.sound ? 'on' : 'off')); }
+    if (Input.pressed('mute')) { Sound.setEnabled(!Sound.enabled); Save.saveSettings(); Toast.show('Sound ' + (Sound.enabled ? 'on' : 'off')); }
     if (Input.pressed('fullscreen')) toggleFullscreen();
 
     Sound.update(dt);
@@ -288,6 +288,7 @@ class Place {
     if (this.def.overlay) this.def.overlay(c, this, cam, t, nf);
     if (wea === 'storm') Weather.rain(c, t, 1);
     if (wea === 'fog') Weather.fog(c, t, cam, this.def.fogDensity || 0.8);
+    if (wea === 'snow') Weather.snow(c, t, this.def.snowAmount || 0.6);
     // prompt
     if (this.prompt && !Game.busy()) {
       const o = this.prompt;
@@ -303,19 +304,68 @@ class Place {
 // ---------------------------------------------------------------------------
 // Title & intro scenes
 // ---------------------------------------------------------------------------
+// Chapter registry: title, intro text and where each chapter begins.
+const CHAPTER_INFO = {
+  1: {
+    label: 'Chapter I: The Lost Fisherman', short: 'Chapter I',
+    intro: [
+      'Saltmere. Autumn.',
+      'A month ago, your grandfather, Ansel Hale, rowed out of the harbour at dusk.',
+      'He said he had seen the lights again.',
+      'His boat, the Margaret, never came back.',
+      'The search boats looked for nine days and found nothing. Not one plank.',
+      'Everyone says the sea keeps its secrets.',
+      "But you've never been very good at leaving secrets alone.",
+    ],
+    start: { scene: 'cottage', params: { x: 120, intro: true } },
+  },
+};
+
+function startChapter(ch) {
+  Save.clearSlot(ch);
+  S = newState(ch);
+  Game.goto('intro');
+}
+function continueGame(st) {
+  S = st;
+  const info = CHAPTER_INFO[S.ch || 1];
+  Game.goto(Game.scenes[S.loc] instanceof Place ? S.loc : info.start.scene, { banner: true });
+}
+
 const TitleScene = {
   hud: false,
   enter() {
     this.t = 0;
     this.sel = 0;
-    this.save = Save.read();
-    this.items = this.save && !this.save.f.ended ? ['Continue', 'New Game', 'Sound', 'Controls'] : ['New Game', 'Sound', 'Controls'];
-    if (this.save && this.save.f.ended) this.items = ['New Game', 'Sound', 'Controls'];
-    if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.quit) this.items.push('Quit');
+    Save.load();
+    const last = Save.lastSlot();
+    this.items = [];
+    if (last && !last.f.ended) this.items.push({ label: 'Continue  (' + CHAPTER_INFO[last.ch || 1].short + ')', act: () => continueGame(last) });
+    for (const ch of Object.keys(CHAPTER_INFO).map(Number)) {
+      const locked = !Save.isUnlocked(ch);
+      this.items.push({ label: locked ? CHAPTER_INFO[ch].short + ': locked' : CHAPTER_INFO[ch].label, locked, ch, act: () => this.pickChapter(ch, locked) });
+    }
+    this.items.push({ label: 'Sound', act: () => Game.run(openSettings) });
+    this.items.push({ label: 'Controls', act: () => Game.run(showControls) });
+    if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.quit) this.items.push({ label: 'Quit', act: () => window.webkit.messageHandlers.quit.postMessage(1) });
     this.clouds = this.clouds || new CloudLayer(5, 7, 30, 100, 0.2, 'fair');
     Sound.setMood('night');
     Sound.setAmbience({ sea: 0.6, wind: 0.15, rain: 0, fire: 0 });
-    S = S || newState();
+    if (!S) { S = newState(); S.placeholder = true; }
+  },
+  pickChapter(ch, locked) {
+    if (locked) { Game.run(() => Dlg.narrate('Finish ' + CHAPTER_INFO[ch - 1].short + ' to unlock ' + CHAPTER_INFO[ch].short + '.')); return; }
+    const st = Save.slot(ch);
+    if (st && !st.f.ended) {
+      Game.run(async () => {
+        const r = await Dlg.ask(null, CHAPTER_INFO[ch].label + '. You have a game in progress.', ['Continue', 'Start over', 'Back']);
+        if (r === 0) continueGame(st);
+        if (r === 1) {
+          const r2 = await Dlg.ask(null, 'Start this chapter over? Your progress in it will be lost.', ['No, go back', 'Yes, start over']);
+          if (r2 === 1) startChapter(ch);
+        }
+      });
+    } else startChapter(ch);
   },
   update(dt, free) {
     this.t += dt;
@@ -325,19 +375,7 @@ const TitleScene = {
     if (Input.pressed('down')) { this.sel = (this.sel + 1) % n; Sound.sfx('blip'); }
     if (Input.pressed('act')) {
       Sound.sfx('select');
-      const it = this.items[this.sel];
-      if (it === 'Continue') { S = this.save; Sound.setEnabled(S.sound); Sound.setVolumes(S.musicVol, S.sfxVol); Game.goto(Game.scenes[S.loc] instanceof Place ? S.loc : 'village', { banner: true }); }
-      if (it === 'New Game') {
-        if (this.save && !this.save.f.ended) {
-          Game.run(async () => {
-            const r = await Dlg.ask(null, 'Start a new game? Your saved progress will be lost.', ['No, go back', 'Yes, start over']);
-            if (r === 1) { Save.clear(); S = newState(); Game.goto('intro'); }
-          });
-        } else { Save.clear(); S = newState(); Game.goto('intro'); }
-      }
-      if (it === 'Controls') Game.run(showControls);
-      if (it === 'Sound') Game.run(openSettings);
-      if (it === 'Quit') window.webkit.messageHandlers.quit.postMessage(1);
+      this.items[this.sel].act();
     }
   },
   draw(c) {
@@ -377,9 +415,9 @@ const TitleScene = {
     drawText(c, 'One night, a fisherman went out to sea and never came back.', W / 2, 70, '#c8d0e0', { align: 'center', shadow: '#000' });
     this.items.forEach((it, i) => {
       const sel = i === this.sel;
-      const y = 112 + i * 14;
-      if (sel) drawText(c, '→', W / 2 - textWidth(it) / 2 - 12, y, UIC.hi, { shadow: '#000' });
-      drawText(c, it, W / 2, y, sel ? UIC.hi : '#e8e4d8', { align: 'center', shadow: '#000' });
+      const y = 100 + i * 14;
+      if (sel) drawText(c, '→', W / 2 - textWidth(it.label) / 2 - 12, y, UIC.hi, { shadow: '#000' });
+      drawText(c, it.label, W / 2, y, it.locked ? '#7a8090' : sel ? UIC.hi : '#e8e4d8', { align: 'center', shadow: '#000' });
     });
     drawText(c, 'Arrow keys + E / Enter', W / 2, H - 12, '#8a94a8', { align: 'center', shadow: '#000' });
   },
@@ -387,30 +425,28 @@ const TitleScene = {
 
 const IntroScene = {
   hud: false,
-  lines: [
-    'Saltmere. Autumn.',
-    'A month ago, your grandfather, Ansel Hale, rowed out of the harbour at dusk.',
-    'He said he had seen the lights again.',
-    'His boat, the Margaret, never came back.',
-    'The search boats looked for nine days and found nothing. Not one plank.',
-    'Everyone says the sea keeps its secrets.',
-    "But you've never been very good at leaving secrets alone.",
-  ],
-  enter() { this.t = 0; this.i = 0; this.lt = 0; Sound.setMood('night'); Sound.setAmbience({ sea: 0.4, wind: 0.2, rain: 0 }); },
+  enter() {
+    this.done = false;
+    this.t = 0; this.i = 0; this.lt = 0;
+    this.info = CHAPTER_INFO[S.ch || 1];
+    this.lines = this.info.intro;
+    Sound.setMood('night'); Sound.setAmbience({ sea: 0.4, wind: 0.2, rain: 0 });
+  },
+  finish() { if (this.done) return; this.done = true; const st = this.info.start; Game.goto(st.scene, Object.assign({}, st.params)); },
   update(dt, free) {
     this.t += dt; this.lt += dt;
     if (!free) return;
     if ((Input.pressed('act') && this.lt > 0.5) || this.lt > 5.5) {
       this.i++; this.lt = 0;
-      if (this.i >= this.lines.length) {
-        Game.goto('cottage', { x: 120, intro: true });
-      }
+      if (this.i >= this.lines.length) this.finish();
     }
-    if (Input.pressed('back')) Game.goto('cottage', { x: 120, intro: true });
+    if (Input.pressed('back')) this.finish();
   },
   draw(c) {
     rect(c, 0, 0, W, H, '#05070c');
+    drawText(c, this.info.label.toUpperCase(), W / 2, 22, '#8a7a5a', { align: 'center' });
     for (let j = 0; j <= Math.min(this.i, this.lines.length - 1); j++) {
+      if (this.lines.length > 7 && j < this.i - 6) continue;
       const a = j === this.i ? clamp(this.lt / 1.2, 0, 1) : 0.55;
       c.globalAlpha = a;
       const lines = wrapText(this.lines[j], 400);
@@ -427,14 +463,15 @@ const IntroScene = {
 function boot() {
   initPeople();
   initIcons();
-  S = newState();
-  const pre = Save.read();
-  if (pre) { S.sound = pre.sound; S.musicVol = pre.musicVol; S.sfxVol = pre.sfxVol; }
-  Sound.enabled = S.sound !== false;
-  Sound.setVolumes(S.musicVol !== undefined ? S.musicVol : 6, S.sfxVol !== undefined ? S.sfxVol : 8);
+  Save.load();
+  const set = Save.data.settings || {};
+  Sound.enabled = set.sound !== false;
+  Sound.setVolumes(set.music !== undefined ? set.music : 6, set.sfx !== undefined ? set.sfx : 8);
+  S = newState(); S.placeholder = true;
   Game.scenes.title = TitleScene;
   Game.scenes.intro = IntroScene;
   registerPlaces();
+  if (typeof registerChapter2 === 'function') registerChapter2();
   registerSeaScenes();
   Game.scenes.whale = WhaleScene;
   Game.scenes.epilogue = EpilogueScene;

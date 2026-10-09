@@ -325,17 +325,24 @@ const LETTERS = [
   { t: 'The last one', body: "To whoever finds this: my name is Ansel Hale of Saltmere. I am on an island inside the fog, west of the Teeth. I'm alright, mostly. My boat is gone. She is hurt and I won't leave her. If the light at Kettle Point ever shines again, I'll know someone is coming." },
 ];
 
+// collectible writings shown in the journal, per chapter
+const JOURNAL_COLLECTIONS = {};
+function journalCollection() {
+  return JOURNAL_COLLECTIONS[S.ch || 1] || { title: 'Messages in bottles', hint: 'Bottles drift on the currents. Keep an eye out while sailing.', icon: 'bottle', list: LETTERS };
+}
+
 async function openJournal() {
   while (true) {
     const obj = objectives();
     const items = [];
     obj.forEach(o => items.push({ label: (o.length > 46 ? o.substr(0, 44) + '...' : o), desc: o, goal: true }));
-    items.push({ label: '- Messages in bottles: ' + S.bottles.length + ' / 5 -', disabled: false, desc: 'Bottles drift on the currents. Keep an eye out while sailing.', sep: true });
-    S.bottles.slice().sort().forEach(i => items.push({ label: LETTERS[i].t, icon: 'bottle', desc: 'Read this message.', letter: i }));
+    const col = journalCollection();
+    items.push({ label: '- ' + col.title + ': ' + S.bottles.length + ' / ' + col.list.length + ' -', disabled: false, desc: col.hint, sep: true });
+    S.bottles.slice().sort().forEach(i => items.push({ label: col.list[i].t, icon: col.icon, desc: 'Read this.', letter: i }));
     const i = await Menu.list({ title: 'Journal', subtitle: 'Day ' + S.day, items, w: 330, rows: 10 });
     if (i < 0) return;
     const it = items[i];
-    if (it.letter !== undefined) await Dlg.say(null, LETTERS[it.letter].body);
+    if (it.letter !== undefined) await Dlg.say(null, col.list[it.letter].body);
     else if (it.goal) await Dlg.say(null, it.desc);
   }
 }
@@ -363,13 +370,7 @@ async function openPause() {
 }
 
 async function openSettings() {
-  const store = () => {
-    // On the title screen the live state is a blank placeholder: update the real save instead.
-    const target = Game.sceneId === 'title' ? TitleScene.save : S;
-    if (!target) return;
-    target.musicVol = Sound.musicVol; target.sfxVol = Sound.sfxVol; target.sound = Sound.enabled;
-    const live = S; S = target; Save.write(); S = live;
-  };
+  const store = () => Save.saveSettings();
   const items = [
     {
       label: 'Music', level: () => Sound.musicVol, desc: 'Left / Right to change the music volume.',
@@ -381,7 +382,7 @@ async function openSettings() {
     },
     {
       label: () => 'Mute everything: ' + (Sound.enabled ? 'Off' : 'On'), desc: 'Press M at any time to mute or unmute.',
-      adjust: () => { Sound.setEnabled(!Sound.enabled); if (S) S.sound = Sound.enabled; store(); },
+      adjust: () => { Sound.setEnabled(!Sound.enabled); store(); },
     },
     { label: 'Done' },
   ];

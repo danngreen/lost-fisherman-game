@@ -21,6 +21,9 @@ const ITEMS = {
   parrotfish: { name: 'Parrotfish', type: 'fish', price: 10 },
   moonfish: { name: 'Moonfish', type: 'fish', price: 25, desc: 'It glows faintly, like moonlight under water.' },
   boot: { name: 'Old Boot', type: 'junk', price: 1, desc: 'Not much of a catch.' },
+  haddock: { name: 'Haddock', type: 'fish', price: 7 },
+  char: { name: 'Arctic Char', type: 'fish', price: 14 },
+  halibut: { name: 'Halibut', type: 'fish', price: 18 },
   bread: { name: 'Bread', type: 'food', food: 1, desc: 'A crusty loaf from Rosa. Food for one leg of a voyage.' },
   cooked: { name: 'Cooked Fish', type: 'food', food: 1, desc: 'Food for one leg of a voyage.' },
   coconut: { name: 'Coconut', type: 'food', food: 1, price: 2, desc: 'Food and drink. Good for one leg of a voyage.' },
@@ -36,9 +39,10 @@ const FOOD_ORDER = ['cooked', 'bread', 'coconut'];
 
 let S = null; // the live state
 
-function newState() {
-  return {
-    v: 1,
+function newState(ch) {
+  ch = ch || 1;
+  const st = {
+    v: 1, ch,
     day: 1, time: 7.25,
     coins: 12,
     inv: {},
@@ -49,10 +53,12 @@ function newState() {
     stats: { fish: 0, caught: {}, startedAt: Date.now() },
     daily: { day: 1, palms: [1, 1, 1], oysters: [1, 1, 1] },
     hull: 3,
-    sound: Sound.enabled !== false,
-    musicVol: Sound.musicVol, sfxVol: Sound.sfxVol,
   };
+  if (CHAPTER_SETUP[ch]) CHAPTER_SETUP[ch](st);
+  return st;
 }
+// per-chapter starting conditions (filled in by chapter scripts)
+const CHAPTER_SETUP = {};
 
 const Inv = {
   count(id) { return S.inv[id] || 0; },
@@ -83,7 +89,7 @@ function flag(k) { return !!S.f[k]; }
 function setFlag(k, v) { S.f[k] = v === undefined ? true : v; }
 
 function boatCfg() {
-  return { type: S.boat || 'row', iron: flag('ironHull'), lantern: flag('lantern') };
+  return { type: S.boat || 'row', iron: flag('ironHull'), lantern: flag('lantern'), iceBow: flag('iceBow') };
 }
 function maxHull() { return flag('ironHull') ? 6 : 3; }
 
@@ -113,36 +119,60 @@ const Clock = {
 };
 
 // ---------------- saving ----------------
+// One save file holds every chapter: { v: 2, slots: {1: state, 2: state}, unlocked, last, settings }.
 const Save = {
   key: 'lostfisherman.save.v1',
+  data: null,
   hasNative() { return !!(window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.save); },
+  load() {
+    let json = null;
+    if (typeof window.__SAVE_DATA__ === 'string' && window.__SAVE_DATA__.length > 2) json = window.__SAVE_DATA__;
+    if (!json) { try { json = localStorage.getItem(this.key); } catch (e) { } }
+    let d = null;
+    try { d = json ? JSON.parse(json) : null; } catch (e) { d = null; }
+    if (d && d.v === 1 && d.day) {
+      // a Chapter I save from before chapters existed
+      d.ch = 1;
+      d = { v: 2, slots: { 1: d }, unlocked: { 2: !!(d.f && d.f.ended) }, last: 1, settings: { music: d.musicVol, sfx: d.sfxVol, sound: d.sound } };
+    }
+    if (!d || d.v !== 2) d = { v: 2, slots: {}, unlocked: {}, last: 1, settings: {} };
+    this.data = d;
+    return d;
+  },
+  slot(ch) {
+    if (!this.data) this.load();
+    const st = this.data.slots[ch];
+    if (!st) return null;
+    return Object.assign(newState(ch), st, { ch });
+  },
+  lastSlot() { return this.data ? this.slot(this.data.last) : null; },
   write() {
-    if (!S) return;
-    const json = JSON.stringify(S);
+    if (!S || S.placeholder) return;
+    if (!this.data) this.load();
+    this.data.slots[S.ch || 1] = S;
+    this.data.last = S.ch || 1;
+    this.flush();
+  },
+  saveSettings() {
+    if (!this.data) this.load();
+    this.data.settings = { music: Sound.musicVol, sfx: Sound.sfxVol, sound: Sound.enabled };
+    this.flush();
+  },
+  unlock(ch) { if (!this.data) this.load(); this.data.unlocked[ch] = true; this.flush(); },
+  isUnlocked(ch) { if (!this.data) this.load(); return ch === 1 || !!this.data.unlocked[ch]; },
+  clearSlot(ch) { if (!this.data) this.load(); delete this.data.slots[ch]; this.flush(); },
+  flush() {
+    const json = JSON.stringify(this.data);
     try { if (this.hasNative()) window.webkit.messageHandlers.save.postMessage(json); } catch (e) { }
     try { localStorage.setItem(this.key, json); } catch (e) { }
     window.__SAVE_DATA__ = json;
   },
-  read() {
-    let json = null;
-    if (typeof window.__SAVE_DATA__ === 'string' && window.__SAVE_DATA__.length > 2) json = window.__SAVE_DATA__;
-    if (!json) { try { json = localStorage.getItem(this.key); } catch (e) { } }
-    if (!json) return null;
-    try {
-      const d = JSON.parse(json);
-      if (!d || !d.v) return null;
-      return Object.assign(newState(), d);
-    } catch (e) { return null; }
-  },
-  clear() {
-    try { if (this.hasNative()) window.webkit.messageHandlers.save.postMessage(''); } catch (e) { }
-    try { localStorage.removeItem(this.key); } catch (e) { }
-    window.__SAVE_DATA__ = '';
-  },
 };
 
 // ---------------- objectives ----------------
+const CHAPTER_OBJECTIVES = {};
 function objectives() {
+  if (S.ch && S.ch !== 1 && CHAPTER_OBJECTIVES[S.ch]) return CHAPTER_OBJECTIVES[S.ch]();
   const o = [];
   const f = S.f;
   if (f.ended) { o.push('You found him. Enjoy the sea!'); return o; }

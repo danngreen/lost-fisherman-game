@@ -11,6 +11,8 @@ const FISH_TABLES = {
   deep: [['cod', 40], ['snapper', 30], ['mackerel', 30]],
   lighthouse: [['cod', 45], ['mackerel', 35], ['herring', 20]],
   hollow: [['cod', 50], ['moonfish', 30], ['snapper', 20]],
+  north: [['herring', 30], ['haddock', 32], ['char', 24], ['halibut', 10], ['boot', 4]],
+  ice: [['char', 45], ['halibut', 30], ['haddock', 25]],
 };
 
 function pickFish(spot) {

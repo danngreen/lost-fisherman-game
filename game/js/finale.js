@@ -193,6 +193,7 @@ async function homecoming(sc) {
   setFlag('ended');
   S.stats.days = S.day;
   Save.write();
+  Save.unlock(2);
   await Game.fadeTo(1, 1.5);
   Game.hudHidden = false;
   Game.setScene('epilogue');
@@ -201,14 +202,11 @@ async function homecoming(sc) {
 
 const EpilogueScene = {
   hud: false,
-  cards: [
-    'Grandpa bought his pocket watch back from Mira the very next week. She charged him one jar of honey and one very long story.',
-    'Old Bram never let the Kettle Point light go dark again. Saltmere made sure the supply boat sailed every single month.',
-    'And every autumn after that, on the first clear night, the whole village gathers on the pier.',
-    'Far out past Gull Rock, the sea lights up, green and blue, like lanterns rising.',
-    "Grandpa says she's just saying hello.",
-  ],
-  enter() { this.t = 0; this.i = 0; this.ct = 0; Sound.setMood('wonder'); },
+  enter() {
+    this.t = 0; this.i = 0; this.ct = 0; Sound.setMood('wonder');
+    this.ep = EPILOGUES[S.ch || 1];
+    this.cards = this.ep.cards;
+  },
   update(dt, free) {
     this.t += dt; this.ct += dt;
     if (!free) return;
@@ -219,7 +217,7 @@ const EpilogueScene = {
   },
   draw(c) {
     const t = this.t;
-    Sky.draw(c, 21.5, 'clear', 180, Game.t);
+    Sky.draw(c, 21.5, this.ep.sky || 'clear', 180, Game.t);
     composeWorld(c, w => {
       Sea.draw(w, 180, H, t * 2, t, 'night', 21.5);
       for (let i = 0; i < 70; i++) { const hh = Math.round(Math.sin(i / 70 * Math.PI) * 30); rect(w, 60 + i, 180 - hh, 1, hh, '#14181e'); }
@@ -236,20 +234,33 @@ const EpilogueScene = {
     if (this.i < this.cards.length) {
       wrapText(this.cards[this.i], 380).forEach((l, k) => drawText(c, l, W / 2, 60 + k * 12, '#f4ecd8', { align: 'center', shadow: '#000' }));
     } else if (this.i === this.cards.length) {
-      drawText(c, 'THE END', W / 2, 52, UIC.hi, { align: 'center', shadow: '#000' });
-      const caught = S.stats.fish || 0;
-      const lines = [
-        'You found Grandpa in ' + (S.stats.days || S.day) + ((S.stats.days || S.day) === 1 ? ' day.' : ' days.'),
-        'Fish caught: ' + caught,
-        'Messages in bottles found: ' + S.bottles.length + ' / 5',
-      ];
-      lines.forEach((l, k) => drawText(c, l, W / 2, 76 + k * 12, '#dfe6f2', { align: 'center', shadow: '#000' }));
+      drawText(c, this.ep.endTitle, W / 2, 52, UIC.hi, { align: 'center', shadow: '#000' });
+      this.ep.stats().forEach((l, k) => drawText(c, l, W / 2, 76 + k * 12, '#dfe6f2', { align: 'center', shadow: '#000' }));
     } else {
-      drawText(c, 'Thank you for playing', W / 2, 60, '#f4ecd8', { align: 'center', shadow: '#000' });
-      drawText(c, 'The Lost Fisherman', W / 2, 74, UIC.hi, { align: 'center', shadow: '#000' });
+      this.ep.final.forEach((l, k) => drawText(c, l, W / 2, 60 + k * 14, k === 1 ? UIC.hi : '#f4ecd8', { align: 'center', shadow: '#000' }));
     }
     c.globalAlpha = 1;
     drawText(c, '[E]', W - 20, H - 14, '#5a6070');
   },
 };
 
+
+const plural = (n, word) => n + ' ' + word + (n === 1 ? '' : 's');
+const EPILOGUES = {
+  1: {
+    cards: [
+      'Grandpa bought his pocket watch back from Mira the very next week. She charged him one jar of honey and one very long story.',
+      'Old Bram never let the Kettle Point light go dark again. Saltmere made sure the supply boat sailed every single month.',
+      'And every autumn after that, on the first clear night, the whole village gathers on the pier.',
+      'Far out past Gull Rock, the sea lights up, green and blue, like lanterns rising.',
+      "Grandpa says she's just saying hello.",
+    ],
+    endTitle: 'THE END',
+    stats: () => [
+      'You found Grandpa in ' + plural(S.stats.days || S.day, 'day') + '.',
+      'Fish caught: ' + (S.stats.fish || 0),
+      'Messages in bottles found: ' + S.bottles.length + ' / 5',
+    ],
+    final: ['Thank you for playing', 'The Lost Fisherman', '', 'Chapter II is now unlocked on the title screen.'],
+  },
+};
