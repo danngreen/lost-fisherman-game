@@ -179,7 +179,7 @@ const Sound = {
     const M = this.music;
     const m = MOODS[M.mood];
     if (!m) return;
-    if (M.next < t - 0.5) M.next = t + 0.05; // recover after the tab sleeps
+    if (M.next < t - 0.5 || M.next < 0.05) M.next = t + 0.05; // first beat, or recovering after a pause
     while (M.next < t + 0.25) {
       this.scheduleBeat(m, M, M.next);
       M.next += m.beat;
@@ -237,6 +237,7 @@ const Sound = {
   note(midi, wave, vol, dur, t, o) {
     o = o || {};
     const ac = this.ac;
+    t = Math.max(t, ac.currentTime + 0.005); // never schedule in the past
     const osc = ac.createOscillator(); osc.type = wave;
     osc.frequency.value = 440 * Math.pow(2, (midi - 69) / 12);
     const g = ac.createGain();
