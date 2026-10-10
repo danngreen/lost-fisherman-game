@@ -321,9 +321,10 @@ const CHAPTER_INFO = {
   },
 };
 
-function startChapter(ch) {
-  Save.clearSlot(ch);
+function startChapter(ch, slot) {
+  Save.clearSlot(slot);
   S = newState(ch);
+  S.slot = slot;
   Game.goto('intro');
 }
 function continueGame(st) {
@@ -332,19 +333,77 @@ function continueGame(st) {
   Game.goto(Game.scenes[S.loc] instanceof Place ? S.loc : info.start.scene, { banner: true });
 }
 
+function slotSummary(st) {
+  if (!st) return 'Empty';
+  return CHAPTER_INFO[st.ch || 1].short + (st.f.ended ? '  (complete)' : '  \u00b7  Day ' + st.day);
+}
+function slotDetail(st) {
+  if (!st) return 'An empty save slot.';
+  const info = CHAPTER_INFO[st.ch || 1];
+  if (st.f.ended) return info.label + '. Finished!';
+  const sc = Game.scenes[st.loc];
+  const where = sc && sc.def && sc.def.name ? sc.def.name : 'At sea';
+  return info.label + '. Day ' + st.day + ', ' + where + '. ' + st.coins + ' coins.';
+}
+// Shows the three slots; returns the chosen index or -1.
+function pickSlot(title, filledOnly) {
+  const items = [];
+  for (let i = 0; i < SLOTS; i++) {
+    const st = Save.slot(i);
+    items.push({ label: 'Slot ' + (i + 1), right: slotSummary(st), desc: slotDetail(st), disabled: filledOnly && !st, whyNot: 'This slot is empty.' });
+  }
+  return Menu.list({ title, items, w: 300, sel: Save.data.last || 0 });
+}
+// Asks which unlocked chapter to start from (skipped when only one is open).
+async function pickChapter() {
+  const chs = Object.keys(CHAPTER_INFO).map(Number);
+  const open = chs.filter(ch => Save.isUnlocked(ch));
+  if (open.length === 1) return open[0];
+  const items = chs.map(ch => ({
+    label: CHAPTER_INFO[ch].label, disabled: !Save.isUnlocked(ch),
+    whyNot: 'Finish ' + (CHAPTER_INFO[ch - 1] || {}).short + ' to unlock this chapter.',
+    desc: Save.isUnlocked(ch) ? 'Begin ' + CHAPTER_INFO[ch].short + '.' : 'Locked. Finish ' + (CHAPTER_INFO[ch - 1] || {}).short + ' first.',
+  }));
+  const i = await Menu.list({ title: 'Start from which chapter?', items, w: 300 });
+  return i < 0 ? -1 : chs[i];
+}
+
+async function titleContinue() {
+  const i = await pickSlot('Continue', true);
+  if (i < 0) return;
+  const st = Save.slot(i);
+  if (st.f.ended) {
+    const next = (st.ch || 1) + 1;
+    if (CHAPTER_INFO[next] && Save.isUnlocked(next)) {
+      const r = await Dlg.ask(null, CHAPTER_INFO[st.ch || 1].short + ' is complete! Begin ' + CHAPTER_INFO[next].label + ' in this slot?', ['Begin ' + CHAPTER_INFO[next].short, 'Back']);
+      if (r === 0) startChapter(next, i);
+    } else await Dlg.narrate('This story is complete. Choose New Game to play it again.');
+    return;
+  }
+  continueGame(st);
+}
+
+async function titleNewGame() {
+  const i = await pickSlot('New Game', false);
+  if (i < 0) return;
+  if (Save.data.slots[i]) {
+    const r = await Dlg.ask(null, 'This will delete your progress in this slot. Are you sure?', ['Clear', 'Cancel']);
+    if (r !== 0) return;
+  }
+  const ch = await pickChapter();
+  if (ch < 0) return;
+  startChapter(ch, i);
+}
+
 const TitleScene = {
   hud: false,
   enter() {
     this.t = 0;
     this.sel = 0;
     Save.load();
-    const last = Save.lastSlot();
     this.items = [];
-    if (last && !last.f.ended) this.items.push({ label: 'Continue  (' + CHAPTER_INFO[last.ch || 1].short + ')', act: () => continueGame(last) });
-    for (const ch of Object.keys(CHAPTER_INFO).map(Number)) {
-      const locked = !Save.isUnlocked(ch);
-      this.items.push({ label: locked ? CHAPTER_INFO[ch].short + ': locked' : CHAPTER_INFO[ch].label, locked, ch, act: () => this.pickChapter(ch, locked) });
-    }
+    if (Save.anyGame()) this.items.push({ label: 'Continue', act: () => Game.run(titleContinue) });
+    this.items.push({ label: 'New Game', act: () => Game.run(titleNewGame) });
     this.items.push({ label: 'Sound', act: () => Game.run(openSettings) });
     this.items.push({ label: 'Controls', act: () => Game.run(showControls) });
     if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.quit) this.items.push({ label: 'Quit', act: () => window.webkit.messageHandlers.quit.postMessage(1) });
@@ -352,20 +411,6 @@ const TitleScene = {
     Sound.setMood('night');
     Sound.setAmbience({ sea: 0.6, wind: 0.15, rain: 0, fire: 0 });
     if (!S) { S = newState(); S.placeholder = true; }
-  },
-  pickChapter(ch, locked) {
-    if (locked) { Game.run(() => Dlg.narrate('Finish ' + CHAPTER_INFO[ch - 1].short + ' to unlock ' + CHAPTER_INFO[ch].short + '.')); return; }
-    const st = Save.slot(ch);
-    if (st && !st.f.ended) {
-      Game.run(async () => {
-        const r = await Dlg.ask(null, CHAPTER_INFO[ch].label + '. You have a game in progress.', ['Continue', 'Start over', 'Back']);
-        if (r === 0) continueGame(st);
-        if (r === 1) {
-          const r2 = await Dlg.ask(null, 'Start this chapter over? Your progress in it will be lost.', ['No, go back', 'Yes, start over']);
-          if (r2 === 1) startChapter(ch);
-        }
-      });
-    } else startChapter(ch);
   },
   update(dt, free) {
     this.t += dt;
@@ -413,9 +458,9 @@ const TitleScene = {
     }
     c.drawImage(this.titleImg, Math.round(W / 2 - this.titleImg.width), 40, this.titleImg.width * 2, this.titleImg.height * 2);
     drawText(c, 'One night, a fisherman went out to sea and never came back.', W / 2, 70, '#c8d0e0', { align: 'center', shadow: '#000' });
-    this.items.forEach((it, i) => {
+    if (!Menu.active) this.items.forEach((it, i) => {
       const sel = i === this.sel;
-      const y = 100 + i * 14;
+      const y = 106 + i * 14;
       if (sel) drawText(c, '→', W / 2 - textWidth(it.label) / 2 - 12, y, UIC.hi, { shadow: '#000' });
       drawText(c, it.label, W / 2, y, it.locked ? '#7a8090' : sel ? UIC.hi : '#e8e4d8', { align: 'center', shadow: '#000' });
     });

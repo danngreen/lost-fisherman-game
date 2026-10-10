@@ -894,8 +894,13 @@ const COCONUT = {
     PALM_X.forEach((x, i) => drawPalm(w, x - cam, this.ground(x), 54 + (i % 2) * 10, t, { coconuts: S.daily.palms[i] ? 3 : 0, lean: i === 1 ? -0.2 : 0.25, seed: x }));
     IRON_X.forEach((x, i) => {
       const gy = this.ground(x);
-      if (flag('iw' + i)) { rect(w, x - 4 - cam, gy - 5, 9, 5, '#3a2a1e'); rect(w, x - 3 - cam, gy - 6, 7, 1, '#c8a878'); }
-      else drawTree(w, x - cam, gy, 62, t * 0.3, { trunk: '#2a1e18', leaf: ['#1e3a24', '#2a4a2e', '#3a5e3a'], seed: x });
+      drawTree(w, x - cam, gy, 62, t * 0.3, { trunk: '#2a1e18', leaf: ['#1e3a24', '#2a4a2e', '#3a5e3a'], seed: x });
+      const bx = x + 2 - cam, by = gy - 26;
+      if (flag('iw' + i)) { rect(w, bx, by, 3, 2, '#2a1e18'); rect(w, bx + 3, by, 1, 2, '#c8a878'); }
+      else {
+        line(w, bx, by, bx + 13, by - 7, '#2a1e18'); line(w, bx, by + 1, bx + 13, by - 6, '#2a1e18');
+        ellipse(w, bx + 15, by - 9, 5, 3, '#1e3a24'); ellipse(w, bx + 14, by - 10, 3, 2, '#3a5e3a');
+      }
     });
     // fire
     const fx = 552 - cam, fy = this.ground(552);
@@ -928,9 +933,9 @@ const COCONUT = {
     { x: 552, r: 10, label: 'Cook fish on the fire', act: cookFish },
     { x: 604, r: 14, label: 'Rest in the hammock', act: () => sleepHere('The hammock sways gently in the sea breeze.') },
     ...IRON_X.map((x, i) => ({
-      x, r: 12, label: 'Ironwood tree', when: () => !flag('iw' + i), act: async () => {
+      x, r: 12, label: () => Inv.has('hatchet') ? 'Cut an ironwood branch' : 'Ironwood tree', when: () => !flag('iw' + i), act: async () => {
         if (!Inv.has('hatchet')) { await Dlg.narrate('A dark, twisted ironwood tree. Its bark is as hard as stone. ' + (flag('bramMet') ? 'Bo the shipwright might know what to do with this wood.' : '')); return; }
-        await Dlg.narrate("You swing Bo's hatchet. Clunk. Clunk. CLUNK. It takes forever, but eventually...");
+        await Dlg.narrate("You pick one thick, low branch and swing Bo's hatchet. Clunk. Clunk. CLUNK. It takes forever, but eventually the branch comes down. The tree will grow another.");
         Sound.sfx('chop'); await wait(0.25); Sound.sfx('chop'); await wait(0.25); Sound.sfx('thud');
         setFlag('iw' + i); Inv.add('ironwood'); Clock.advance(0.5);
       },
@@ -1415,7 +1420,7 @@ async function talkAnsel() {
     await Dlg.say('anselR', 'Look at you. LOOK at you! You came through the Teeth? Through the fog? Your grandmother would have skinned me alive.');
     await Dlg.say('anselR', 'How in the world did you find me?');
     await Dlg.say('you', 'I followed your scratches on Gull Rock. And Mira told me you went west. And we lit Bram\'s lighthouse again, and I saw a light blink back.');
-    await Dlg.say('anselR', "That was you? Three nights ago the fog turned gold, and I thought I was dreaming. I lit every bit of driftwood I had, just in case.");
+    await Dlg.say('anselR', "That was you? One night the fog turned gold, and I thought I was dreaming. I lit every bit of driftwood I had, just in case.");
     await Dlg.say('anselR', "Well. I suppose you want to know what happened to your silly old grandpa.");
     await Dlg.say('anselR', "The lights, little gull. The lights I've been chasing my whole life. I finally caught up with them.");
     await Dlg.say('anselR', "She's a whale. The oldest, biggest whale you ever saw in your life. And she glows, all over, like lanterns. Old Finn's Lantern Whale. Every word of that story was true.");

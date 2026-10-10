@@ -62,6 +62,38 @@ function worldTint(h, weather) {
   return { col: rgbStr(col), a: al };
 }
 
+// Moon phase for the night that hour h belongs to: 0 = new, 0.5 = full.
+// It moves on by one eighth each night (a quick, game-sized lunar month).
+function moonPhase(h) {
+  const day = (S && S.day) || 1;
+  const night = ((h % 24) + 24) % 24 < 12 ? day - 1 : day;
+  return (((night - 1) % 8 + 8) % 8 + 3) / 8 % 1;
+}
+function moonLight(ph) { return (1 - Math.cos(ph * Math.PI * 2)) / 2; }
+const _moonCache = {};
+function moonSprite(ph) {
+  const key = Math.round(ph * 8);
+  if (_moonCache[key]) return _moonCache[key];
+  const R = 6, size = R * 2 + 1;
+  const [c, x] = makeCanvas(size, size);
+  const k = Math.cos(key / 8 * Math.PI * 2);
+  const craters = [[-2, -1], [1, 2], [2, -2], [-1, 2], [0, 0]];
+  for (let j = 0; j < size; j++) for (let i = 0; i < size; i++) {
+    const dx = (i - R) / R, dy = (j - R) / R;
+    if (dx * dx + dy * dy > 1.05) continue;
+    const w = Math.sqrt(Math.max(0, 1 - dy * dy));
+    const lit = key < 4 ? dx > k * w : dx < -k * w;
+    if (lit) {
+      const crater = craters.some(([cx, cy]) => i - R === cx && j - R === cy);
+      px(x, i, j, crater ? '#c6cfdf' : '#e9eef8');
+    } else {
+      x.globalAlpha = 0.35; px(x, i, j, '#3a4460'); x.globalAlpha = 1;
+    }
+  }
+  _moonCache[key] = c;
+  return c;
+}
+
 const Sky = {
   cache: null, key: '',
   stars: (() => {
@@ -127,12 +159,13 @@ const Sky = {
     let mt = -1;
     if (h >= 18.8) mt = (h - 18.8) / 11; else if (h < 6.5) mt = (h + 5.2) / 11;
     if (mt > 0 && mt < 1) {
-      const mx = lerp(W - 40, 40, mt), my = horizon - Math.sin(mt * Math.PI) * (horizon - 26) + 4;
-      c.globalAlpha = weather === 'fog' ? 0.3 : 1;
+      const mx = lerp(40, W - 40, mt), my = horizon - Math.sin(mt * Math.PI) * (horizon - 26) + 4;
+      const ph = moonPhase(h), lit = moonLight(ph);
+      const fa = weather === 'fog' ? 0.3 : 1;
+      c.globalAlpha = fa * (0.1 + 0.9 * lit);
       c.drawImage(glowSprite(18, '#a8c0ff', 4, 0.35), Math.round(mx - 18), Math.round(my - 18));
-      ellipse(c, mx, my, 5, 5, '#e9eef8');
-      px(c, mx - 2, my - 1, '#c6cfdf'); px(c, mx + 1, my + 2, '#c6cfdf'); px(c, mx + 2, my - 2, '#d4dbe8');
-      rect(c, mx - 1, my + 1, 2, 1, '#cbd3e2');
+      c.globalAlpha = fa;
+      c.drawImage(moonSprite(ph), Math.round(mx - 6), Math.round(my - 6));
       c.globalAlpha = 1;
     }
   },
@@ -141,7 +174,7 @@ const Sky = {
     if (st > 0 && st < 1) return { x: lerp(30, W - 30, st), col: '#fff0c0', a: 1 - nightFactor(h) * 0.5 };
     let mt = -1;
     if (h >= 18.8) mt = (h - 18.8) / 11; else if (h < 6.5) mt = (h + 5.2) / 11;
-    if (mt > 0 && mt < 1) return { x: lerp(W - 40, 40, mt), col: '#cfdcff', a: 0.6 };
+    if (mt > 0 && mt < 1) return { x: lerp(40, W - 40, mt), col: '#cfdcff', a: 0.6 * moonLight(moonPhase(h)) };
     return null;
   },
 };

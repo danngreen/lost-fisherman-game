@@ -255,12 +255,12 @@ const EPILOGUES = {
       'Far out past Gull Rock, the sea lights up, green and blue, like lanterns rising.',
       "Grandpa says she's just saying hello.",
     ],
-    endTitle: 'THE END',
+    endTitle: 'THE END OF CHAPTER I',
     stats: () => [
       'You found Grandpa in ' + plural(S.stats.days || S.day, 'day') + '.',
       'Fish caught: ' + (S.stats.fish || 0),
       'Messages in bottles found: ' + S.bottles.length + ' / 5',
     ],
-    final: ['Thank you for playing', 'The Lost Fisherman', '', 'Chapter II is now unlocked on the title screen.'],
+    final: ['The story continues...', 'Chapter II: The Compass is now unlocked', '', 'Choose Continue on the title screen to begin it in this save slot.'],
   },
 };

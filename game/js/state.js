@@ -119,7 +119,9 @@ const Clock = {
 };
 
 // ---------------- saving ----------------
-// One save file holds every chapter: { v: 2, slots: {1: state, 2: state}, unlocked, last, settings }.
+// One save file holds three numbered slots, each a game in any chapter:
+// { v: 3, slots: [state|null x3], unlocked: {2: true}, last, settings }
+const SLOTS = 3;
 const Save = {
   key: 'lostfisherman.save.v1',
   data: null,
@@ -131,26 +133,40 @@ const Save = {
     let d = null;
     try { d = json ? JSON.parse(json) : null; } catch (e) { d = null; }
     if (d && d.v === 1 && d.day) {
-      // a Chapter I save from before chapters existed
+      // a single Chapter I save from before chapters existed
       d.ch = 1;
-      d = { v: 2, slots: { 1: d }, unlocked: { 2: !!(d.f && d.f.ended) }, last: 1, settings: { music: d.musicVol, sfx: d.sfxVol, sound: d.sound } };
+      d = { v: 2, slots: { 1: d }, unlocked: {}, last: 1, settings: { music: d.musicVol, sfx: d.sfxVol, sound: d.sound } };
     }
-    if (!d || d.v !== 2) d = { v: 2, slots: {}, unlocked: {}, last: 1, settings: {} };
+    if (d && d.v === 2) {
+      // one slot per chapter -> numbered slots, in chapter order
+      const slots = [], old = d.slots || {};
+      let last = 0;
+      for (const ch of Object.keys(old).map(Number).sort()) {
+        if (!old[ch] || slots.length >= SLOTS) continue;
+        if (ch === d.last) last = slots.length;
+        slots.push(Object.assign(old[ch], { ch }));
+      }
+      d = { v: 3, slots, unlocked: d.unlocked || {}, last, settings: d.settings || {} };
+    }
+    if (!d || d.v !== 3) d = { v: 3, slots: [], unlocked: {}, last: 0, settings: {} };
+    while (d.slots.length < SLOTS) d.slots.push(null);
+    // finishing a chapter always unlocks the next one
+    for (const st of d.slots) if (st && st.f && st.f.ended) d.unlocked[(st.ch || 1) + 1] = true;
     this.data = d;
     return d;
   },
-  slot(ch) {
+  slot(i) {
     if (!this.data) this.load();
-    const st = this.data.slots[ch];
+    const st = this.data.slots[i];
     if (!st) return null;
-    return Object.assign(newState(ch), st, { ch });
+    return Object.assign(newState(st.ch || 1), st, { slot: i });
   },
-  lastSlot() { return this.data ? this.slot(this.data.last) : null; },
+  anyGame() { if (!this.data) this.load(); return this.data.slots.some(Boolean); },
   write() {
-    if (!S || S.placeholder) return;
+    if (!S || S.placeholder || S.slot === undefined) return;
     if (!this.data) this.load();
-    this.data.slots[S.ch || 1] = S;
-    this.data.last = S.ch || 1;
+    this.data.slots[S.slot] = S;
+    this.data.last = S.slot;
     this.flush();
   },
   saveSettings() {
@@ -160,7 +176,7 @@ const Save = {
   },
   unlock(ch) { if (!this.data) this.load(); this.data.unlocked[ch] = true; this.flush(); },
   isUnlocked(ch) { if (!this.data) this.load(); return ch === 1 || !!this.data.unlocked[ch]; },
-  clearSlot(ch) { if (!this.data) this.load(); delete this.data.slots[ch]; this.flush(); },
+  clearSlot(i) { if (!this.data) this.load(); this.data.slots[i] = null; this.flush(); },
   flush() {
     const json = JSON.stringify(this.data);
     try { if (this.hasNative()) window.webkit.messageHandlers.save.postMessage(json); } catch (e) { }
