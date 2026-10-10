@@ -47,20 +47,28 @@ async function sleepHere(text) {
   Toast.show('Day ' + S.day + ', morning');
 }
 
+// Pick which fish to cook, one at a time, so a precious Moonfish never goes in the pan by accident.
 async function cookFish() {
-  const fish = Inv.fishList();
-  const n = fish.reduce((a, k) => a + Inv.count(k), 0);
-  if (!n) { await Dlg.narrate('You have no raw fish to cook. Cooked fish makes good food for voyages.'); return; }
-  const r = await Dlg.ask(null, 'Cook your fish? Each raw fish becomes one Cooked Fish: food for one leg of a voyage. You have ' + n + ' raw fish.', ['Cook all (' + n + ')', 'Cook one', 'Not now']);
-  let k = r === 0 ? n : r === 1 ? 1 : 0;
-  if (!k) return;
-  fish.sort((a, b) => ITEMS[a].price - ITEMS[b].price);
-  let cooked = 0;
-  for (const id of fish) while (k > 0 && Inv.count(id) > 0) { Inv.remove(id); k--; cooked++; }
-  S.inv.cooked = (S.inv.cooked || 0) + cooked;
-  Toast.show('+' + cooked + ' Cooked Fish', 'cooked');
-  Sound.sfx('pickup');
-  Clock.advance(0.1 * cooked);
+  if (!Inv.fishList().length) { await Dlg.narrate('You have no raw fish to cook. Cooked fish makes good food for voyages.'); return; }
+  let sel = 0, cooked = 0;
+  while (true) {
+    const fish = Inv.fishList().sort((a, b) => ITEMS[a].price - ITEMS[b].price);
+    if (!fish.length) break;
+    const items = fish.map(k => ({
+      label: ITEMS[k].name + '  x' + S.inv[k], right: ITEMS[k].price + 'c', icon: k, id: k,
+      desc: 'Cook one ' + ITEMS[k].name + ' into food for one leg of a voyage. (Tam would pay ' + ITEMS[k].price + ' coins for it raw.)',
+    }));
+    items.push({ label: 'Done', id: 'done' });
+    const i = await Menu.list({ title: 'Cook Fish', subtitle: 'Cooked: ' + Inv.count('cooked'), items, w: 280, sel: Math.min(sel, items.length - 1) });
+    if (i < 0 || items[i].id === 'done') break;
+    sel = i;
+    Inv.remove(items[i].id);
+    S.inv.cooked = (S.inv.cooked || 0) + 1;
+    cooked++;
+    Sound.sfx('pickup');
+    Clock.advance(0.1);
+  }
+  if (cooked) Toast.show('+' + cooked + ' Cooked Fish', 'cooked');
 }
 
 function fishAnchor(sc, x, waterY, dir) {
