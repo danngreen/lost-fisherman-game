@@ -611,7 +611,7 @@ const CANNERY = {
   id: 'cannery', name: 'Hookness', sub: 'The old cannery', width: 960, horizon: 150, spawn: 60, minX: 16, maxX: 940,
   music: () => flag('oskarMet') ? 'sea' : 'eerie', ambience: { sea: 0.6, wind: 0.6, fire: 0.1 },
   fishSpot: 'north', weather: northWeather, snowAmount: 0.7,
-  ground: makeGround([[0, 224], [140, 224], [170, 222], [260, 218], [300, 214], [700, 214], [740, 210], [940, 210], [960, 230]]),
+  ground: makeGround([[0, 224], [140, 224], [170, 222], [260, 218], [300, 214], [645, 214], [682, 210], [940, 210], [960, 230]]),
   build(c, sc) {
     const g = roughen(this.ground, 1);
     for (let x = 0; x < 142; x += 22) rect(c, x + 4, 228, 5, 42, '#3a281a');
