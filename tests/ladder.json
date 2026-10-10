@@ -1,0 +1,1 @@
+[{"js":"S=newState(2); S.f.compassFound=1; S.f.openingDone=1; S.time=11; Game.setScene(\"c2_cottage\",{x:240}); Game.fade=0; Banner.cur=null; 1","wait":500,"shot":"ladder_day"},{"js":"S.time=21; Game.scene.player.x=291; 1","wait":400,"shot":"ladder_night"}]

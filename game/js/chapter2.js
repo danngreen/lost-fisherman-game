@@ -382,6 +382,24 @@ async function c2Nell() {
 // THE COTTAGE IN SPRING
 // ===========================================================================
 const C2_COTTAGE = Object.assign({}, COTTAGE, {
+  build(c, sc) {
+    COTTAGE.build.call(this, c, sc);
+    // a hatch in the ceiling and a wooden ladder up to the attic trunk
+    rect(c, 280, 115, 22, 8, '#140c06');
+    rect(c, 279, 114, 24, 1, '#6a4a30'); rect(c, 279, 123, 24, 1, '#2a1a10');
+    const L = 283, R = 297;
+    for (const x of [L, R]) {
+      rect(c, x, 112, 3, 116, '#7a5232');
+      rect(c, x, 112, 1, 116, '#a87a4a');
+      rect(c, x + 2, 112, 1, 116, '#4a3020');
+    }
+    for (let y = 120; y < 226; y += 9) {
+      rect(c, L + 3, y, R - L - 3, 2, '#8a6038');
+      rect(c, L + 3, y, R - L - 3, 1, '#b08458');
+      rect(c, L + 3, y + 2, R - L - 3, 1, '#3a2616');
+    }
+    rect(c, L - 1, 226, 5, 2, '#3a2616'); rect(c, R - 1, 226, 5, 2, '#3a2616');
+  },
   id: 'c2_cottage', name: 'The Cottage',
   npcs: [{ id: 'ansel', x: 272 }],
   objects: [
@@ -389,7 +407,7 @@ const C2_COTTAGE = Object.assign({}, COTTAGE, {
     { x: 100, r: 8, label: 'Look at photo', act: () => Dlg.narrate(flag('oskarMet') ? "Grandma Margaret, laughing on the pier. Maggie Hartley of Hookness, who sailed away from everything she knew." : 'Grandma Margaret, laughing on the pier. For the first time you notice, far behind her, a little boat with a red sail.') },
     { x: 173, r: 12, label: 'Look out the window', act: () => Dlg.narrate(flag('wentNorth') ? 'The harbour is empty now. The whales have gone north, and the compass on your belt points after them.' : 'The two whales rest in the harbour. The big one glows. The little one is a dark shape beside her, like a shadow.') },
     { x: 272, r: 12, label: 'Talk to Grandpa', act: () => c2Ansel() },
-    { x: 304, r: 10, label: 'Climb up to the attic trunk', act: () => c2Trunk() },
+    { x: 291, r: 9, label: 'Climb the ladder to the attic', act: () => c2Trunk() },
     { x: 330, r: 10, label: 'Cook fish on the stove', act: cookFish },
     { x: 386, r: 10, label: 'Open drawer', act: () => Dlg.narrate('String, candle stubs, and that same very old biscuit. Grandpa refuses to throw it away.') },
     { x: 446, r: 12, label: 'Go outside', act: () => { Sound.sfx('door'); Game.goto('c2_village', { x: 77 }); } },
