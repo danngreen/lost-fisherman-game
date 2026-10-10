@@ -11,6 +11,7 @@ Object.assign(ITEMS, {
   pimmap: { name: "Pim's Map", type: 'key', desc: 'A crayon map of the Skerries, showing the safe channels between the rocks. Fewer rocks on Skerries voyages.' },
   efeather: { name: 'Eider Feather', type: 'trade', desc: 'A soft, curly grey feather. Nell would love this.' },
   smoked: { name: 'Smoked Fish', type: 'food', food: 1, desc: "Ingrid's smoked fish. Food for one leg of a voyage." },
+  countbook: { name: "Sigrid's Puffin Book", type: 'key', desc: 'Fifty years of puffin counts. Near the back, in small neat writing: "3,002 puffins. Counted by M. Hartley, aged 12."' },
   cup: { name: 'Regatta Cup', type: 'key', desc: 'A small silver cup engraved MIDSUMMER REGATTA. Somebody has scratched "& ADMIRAL" on the bottom.' },
 });
 FOOD_ORDER.push('smoked');
