@@ -374,10 +374,9 @@ async function titleContinue() {
   const st = Save.slot(i);
   if (st.f.ended) {
     const next = (st.ch || 1) + 1;
-    if (CHAPTER_INFO[next] && Save.isUnlocked(next)) {
-      const r = await Dlg.ask(null, CHAPTER_INFO[st.ch || 1].short + ' is complete! Begin ' + CHAPTER_INFO[next].label + ' in this slot?', ['Begin ' + CHAPTER_INFO[next].short, 'Back']);
-      if (r === 0) startChapter(next, i);
-    } else await Dlg.narrate('This story is complete. Choose New Game to play it again.');
+    // a finished chapter has nothing left to continue, so go straight on to the next one
+    if (CHAPTER_INFO[next] && Save.isUnlocked(next)) startChapter(next, i);
+    else await Dlg.narrate('This story is complete. Choose New Game to play it again.');
     return;
   }
   continueGame(st);
