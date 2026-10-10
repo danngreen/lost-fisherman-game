@@ -197,6 +197,10 @@ function initChapter3Art() {
     coffee: ['..kkkk..', '.kbbbbk.', 'kBBBBBBk', 'kBokkoBk', 'kBkoBkBk', 'kBBBBBBk', '.kBBBBk.', '..kkkk..'],
     letters: ['kkkkkkk.', 'ksskssk.', 'kskkkskk', 'kssrsssk', 'kkkrkkkk', '.ksssssk', '.kkkkkkk', '........'],
     redsail: ['...k....', '...kr...', '...krr..', '...krRr.', '...krrRr', '...krrrr', 'kkkkkkkk', '........'],
+    pimmap: ['kkkkkkkk', 'ksslsssk', 'kslllssk', 'ksslnssk', 'kssslllk', 'ksnsslsk', 'kkkkkkkk', '........'],
+    efeather: ['......kk', '.....kSk', '....kSSk', '...kSSk.', '..kSSk..', '.kSkk...', 'k.......', '........'],
+    smoked: ['........', '..kkkk..', '.kooook.', 'koBoooBk', 'kooooook', '.kBBBBk.', '..kkkk..', '........'],
+    cup: ['kk....kk', 'ksk..ksk', '.kssssk.', '.ksssSk.', '..kssk..', '...kk...', '..kSSk..', '.kkkkkk.'],
     paint: ['..kk....', '..kk....', '.kkkk...', 'krrrrk..', 'krrrrk..', 'kRRRRk..', '.kkkk...', '........'],
   };
   for (const k in defs) ICONS[k] = sprite(defs[k], P);

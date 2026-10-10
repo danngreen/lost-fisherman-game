@@ -64,7 +64,7 @@ const SKETCHES = [
     body: "Seal Skerry. Toby has named every single seal. That one is Duchess. That one is Mr Puddle. That one is ALSO Duchess. M.",
   },
   {
-    t: 'The last rock', todo: 'A white tower on a lonely rock', scene: 'nessend', x: 250,
+    t: 'The last rock', todo: 'A white tower on a lonely rock', scene: 'nessend', x: 196,
     hint: 'A white tower with a red band on a lonely rock. Nowhere you have been yet.',
     body: "Ness End. The last rock in the world. When I am grown up I will live here, at the end of everything, and nobody will tell me what to do. Toby can visit if he brings biscuits. M.",
   },
@@ -166,7 +166,7 @@ CHAPTERS[3] = {
       rough: north ? 1.1 : 1, clouds: 'fair', wind: 0.4, mood: null,
       weather: () => S.day % 3 === 0 && north ? 'cloudy' : 'clear',
       pal: () => north ? 'arctic' : 'north',
-      rocks: L => sk ? { n: Math.floor(L / 170), until: 1, big: 0.3 } : { n: Math.floor(L / 650), until: 1, big: 0 },
+      rocks: L => sk ? { n: Math.floor(L / (flag('pimMap') ? 320 : 170)), until: 1, big: 0.3 } : { n: Math.floor(L / 650), until: 1, big: 0 },
       ice: icy ? 2.5 : 0, kelp: sk ? 3 : 0,
       bottles: false, glow: null, bergs: icy,
       fishSpot: sk ? 'skerry' : north ? 'north3' : 'summer',
@@ -228,7 +228,11 @@ CHAPTER_OBJECTIVES[3] = () => {
     else o.push('Sleep. Bo says the paint will be dry by morning.');
   }
   if (Inv.has('sketchbook') && !flag('skerriesChart')) o.push('Two sketches show places you don\'t know. Ylva at the Puffin Stacks knows these waters.');
-  if (flag('skerriesChart') && !flag('tobyMet')) o.push(flag('wrenReady') ? 'Sail the Wren into the Skerries, east of the Puffin Stacks.' : 'The Skerries are too shallow for Pip. Get the Wren ready to sail.');
+  if (flag('skerriesChart') && !flag('tobyMet')) {
+    if (!flag('wrenReady')) o.push('The Skerries are too shallow for Pip. Get the Wren ready to sail.');
+    else if (!flag('seal3') && !flag('eider3') && !flag('ness3')) o.push('Sail the Wren into the Skerries, east of the Puffin Stacks.');
+    else o.push('Find the white tower at Ness End, the last rock of the Skerries.');
+  }
   if (typeof c3LateObjectives === 'function') c3LateObjectives(o);
   if (Inv.has('sketchbook') && S.bottles.length < SKETCHES.length && o.length < 2) o.push("Find the places in Maggie's sketchbook (" + S.bottles.length + '/' + SKETCHES.length + ').');
   if (!o.length) o.push('Enjoy the summer.');
@@ -279,7 +283,7 @@ const C3_VILLAGE = Object.assign({}, VILLAGE, {
       w.drawImage(b.c, Math.round(743 - cam - b.c.width / 2), 207 - b.wl - 2);
       if (flag('wrenNamed')) drawText(w, 'WREN', 748 - cam, 199, '#e8e0d0');
     }
-    if (flag('regattaDay') && typeof c3RegattaMid === 'function') c3RegattaMid(w, sc, cam, t);
+    if (flag('tobyArrived') && typeof c3RegattaMid === 'function') c3RegattaMid(w, sc, cam, t);
   },
   drawFront(w, sc, cam, t) {
     const px0 = 1036 - cam;
@@ -289,6 +293,8 @@ const C3_VILLAGE = Object.assign({}, VILLAGE, {
       if (flag('wrenReady')) drawBoat(w, { type: 'wren', sail: flag('redSail') ? 'red' : 'white' }, 1092 - cam, 241, t, { phase: 30 });
       frontWater(w, 240, t, 'north', px0, W, cam);
     }
+    // the whales come into the harbour for the bonfire
+    sc.backs = flag('bonfire') ? drawWhaleBacks(w, 1080 - cam, 258, t, true) : null;
   },
   npcs: [
     { id: 'rosa', x: 214 }, { id: 'hollis', x: 326 }, { id: 'finn', x: 418, sit: true, facePlayer: false },
@@ -396,6 +402,7 @@ async function c3Hollis() {
     const items = [];
     if (flag('boList') && !flag('wrenFixed')) items.push({ label: 'Bolt of sailcloth', right: '20c', id: 'sailcloth', desc: 'Good stiff canvas for a small sail.', disabled: S.coins < 20 || Inv.has('sailcloth'), whyNot: Inv.has('sailcloth') ? 'One bolt is plenty.' : 'Not enough coins.' });
     items.push({ label: 'Lucky lure', right: '25c', id: 'lure', desc: 'Fish bite faster and are easier to keep on the line.', disabled: S.coins < 25 || Inv.has('lure'), whyNot: Inv.has('lure') ? 'You already have one.' : 'Not enough coins.' });
+    if (typeof c3HollisExtra === 'function') c3HollisExtra(items);
     items.push({ label: 'Chat', id: 'chat' }, { label: 'Leave', id: 'leave' });
     const i = await Menu.list({ title: 'Hollis & Co.', subtitle: S.coins + ' coins', items, w: 240, sel: Math.min(sel, items.length - 1) });
     if (i < 0 || items[i].id === 'leave') return;
@@ -403,6 +410,7 @@ async function c3Hollis() {
     const id = items[i].id;
     if (id === 'sailcloth') { S.coins -= 20; Inv.add('sailcloth'); Sound.sfx('coin'); await Dlg.say('hollis', 'Sailcloth. For the little Hookness boat? I shall give you the good bolt. Not the bolt the mice got at.'); }
     if (id === 'lure') { S.coins -= 25; Inv.add('lure'); Sound.sfx('coin'); }
+    if (items[i].buy) await items[i].buy();
     if (id === 'chat') await Dlg.say('hollis', ["Regatta entries close on Midsummer Day. Not that I sail. I prefer my water in a cup.", "Summer fish are worth a pretty penny. Sea trout especially. Tam will tell you the same, louder."][(S.f.hollis3 = (S.f.hollis3 || 0) + 1) % 2]);
   }
 }
@@ -412,6 +420,7 @@ async function c3Tam() {
     setFlag('tam3');
     await Dlg.say('tam', "Summer fishing! Mackerel by the bucket, pollock, sea trout if you're lucky. And up in those Skerries, so they say, little lumpfish that look like they've just been told a joke.");
   }
+  if (typeof c3TamLate === 'function' && await c3TamLate()) return;
   await talkTam();
 }
 
