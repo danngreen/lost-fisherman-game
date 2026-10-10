@@ -268,8 +268,10 @@ const C3_VILLAGE = Object.assign({}, VILLAGE, {
       for (let i = 0; i < wi.w + 4; i += 2) px(c, wi.x - 2 + i, wi.y + wi.h + 1 - (i % 4 ? 0 : 1), ['#e85a7a', '#f2c94c', '#ffffff', '#c86ad8'][(i / 2) % 4]);
     }
     // the boat on Bo's trestles is gone: they're waiting for the Wren
-    c.clearRect(716, 186, 60, 20);
+    const old = makeBoat({ type: 'sail' });
+    c.clearRect(716, 186, old.c.width + 4, 20);
     rect(c, 722, 206, 4, 16, '#5a4028'); rect(c, 760, 206, 4, 16, '#5a4028'); rect(c, 718, 206, 50, 2, '#6a4a30');
+    drawLampPost(c, 780, 222);
     // maypole-style bunting posts along the front
     for (const x of [140, 460, 700, 1000]) { rect(c, x, 150, 2, 72, '#7a5a3a'); px(c, x, 149, '#f2c94c'); }
   },
