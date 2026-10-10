@@ -286,7 +286,8 @@ const GoalNote = {
 function drawHUD(c) {
   if (!S) return;
   c.globalAlpha = 0.85;
-  rect(c, 4, 4, 112, 14, '#0e1220');
+  const hint = '[I] Bag  [J] Journal  [Esc] Menu';
+  rect(c, 4, 4, 74 + textWidth(hint) + 6 - 4, 14, '#0e1220');
   c.globalAlpha = 1;
   c.drawImage(ICONS.coin, 7, 7);
   drawText(c, String(S.coins), 18, 7, '#ffe08a');
@@ -298,7 +299,7 @@ function drawHUD(c) {
   rect(c, W - tw - 14, 4, tw + 10, 14, '#0e1220');
   c.globalAlpha = 1;
   drawText(c, tstr, W - 9, 7, '#dfe6f2', { align: 'right' });
-  drawText(c, '[I] Bag  [J] Journal  [Esc] Menu', 74, 7, '#5a6478');
+  drawText(c, hint, 74, 7, '#7a8498');
 }
 
 // ---------------- full screens: inventory, journal, pause ----------------
