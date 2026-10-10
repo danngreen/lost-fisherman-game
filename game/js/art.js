@@ -424,19 +424,21 @@ function drawPerson(c, p, x, gy, o) {
 
 // ---------------- boats ----------------
 const _boatCache = {};
-function boatKey(cfg) { return [cfg.type, cfg.iron ? 1 : 0, cfg.lantern ? 1 : 0, cfg.iceBow ? 1 : 0, cfg.color || ''].join('|'); }
+function boatKey(cfg) { return [cfg.type, cfg.iron ? 1 : 0, cfg.lantern ? 1 : 0, cfg.iceBow ? 1 : 0, cfg.color || '', cfg.sail || ''].join('|'); }
 
 // returns {c, wl (waterline y in canvas), bowX, len, mastTop, lanternPos, seat}
 function makeBoat(cfg) {
   const key = boatKey(cfg);
   if (_boatCache[key]) return _boatCache[key];
   const type = cfg.type;
-  const spec = {
+  let spec = {
     row: { len: 46, hh: 10, mast: 0, colA: '#8a5a34', colB: '#7a4e2c', trim: '#4e321c', stripe: null },
     sail: { len: 62, hh: 12, mast: 52, colA: '#d8d2c2', colB: '#cbc4b2', trim: '#6a4a2c', stripe: '#2c5a8a' },
     big: { len: 80, hh: 14, mast: 72, colA: '#2f5a4a', colB: '#284f41', trim: '#e0d6b8', stripe: '#b5523b' },
     margaret: { len: 70, hh: 13, mast: 0, colA: '#3e6a96', colB: '#365e86', trim: '#e8e2d0', stripe: '#c84a3a' },
+    wren: { len: 44, hh: 9, mast: 44, colA: '#4a6a8a', colB: '#3a5a7a', trim: '#e8e0d0', stripe: null },
   }[type];
+  if (cfg.color) spec = Object.assign({}, spec, { colA: cfg.color, colB: shade(cfg.color, 0.9) });
   const padTop = spec.mast + 10, padX = 8;
   const cw = spec.len + padX * 2, ch = padTop + spec.hh + 4;
   const [c, x] = makeCanvas(cw, ch);
@@ -520,6 +522,26 @@ function makeBoat(cfg) {
     info.mastX = mx; info.mastTop = mt;
     info.seatX = ox + 10;
   }
+  if (type === 'wren') {
+    // Maggie's little boat: one mast and a lug sail (red, plain sailcloth, or none at all)
+    const mx = ox + Math.round(L * 0.52), mt = oy - spec.mast;
+    rect(x, mx, mt, 1, spec.mast + 1, '#5a3c22');
+    if (cfg.sail && cfg.sail !== 'none') {
+      const red = cfg.sail === 'red';
+      for (let y = mt + 2; y < oy - 3; y++) {
+        const t = (y - mt - 2) / (oy - 5 - mt);
+        const x0 = Math.round(mx - 1 - t * (mx - ox - 5));
+        for (let xx = x0; xx < mx; xx++) {
+          let col = red ? (y % 5 === 0 ? '#a84a3a' : '#c8604a') : (y % 7 === 0 ? '#d6ceb8' : '#efe9d8');
+          if (xx === x0) col = red ? '#8a3a2a' : '#bfb6a0';
+          px(x, xx, y, col);
+        }
+      }
+      rect(x, ox + 4, oy - 3, mx - ox - 3, 1, '#6a4a2c');
+    }
+    info.mastX = mx; info.mastTop = mt;
+    info.seatX = ox + 6;
+  }
   if (type === 'margaret') {
     // broken mast stub
     rect(x, ox + Math.round(L * 0.45), oy - 9, 2, 9, '#5a3c22');
@@ -557,14 +579,14 @@ function drawBoat(c, cfg, cx, wy, t, o) {
   c.rotate(flip ? -tilt : tilt);
   if (flip) c.scale(-1, 1);
   const lx = -b.c.width / 2, ly = -b.wl;
-  // passengers
+  c.drawImage(b.c, Math.round(lx), Math.round(ly));
+  // passengers sit in front of the sail, cut off at the gunwale
   if (o.riders) {
     o.riders.forEach((p, i) => {
       const sx = lx + b.seatX + i * 16 - 6;
-      c.drawImage(p, Math.round(sx), Math.round(ly + b.seatY - 14));
+      c.drawImage(p, 0, 0, p.width, 14, Math.round(sx), Math.round(ly + b.seatY - 14), p.width, 14);
     });
   }
-  c.drawImage(b.c, Math.round(lx), Math.round(ly));
   // oars for rowboat
   if (cfg.type === 'row') {
     const ph = o.rowing ? Math.sin(t * 6) : 0.3;

@@ -338,8 +338,12 @@ async function openJournal() {
     const items = [];
     obj.forEach(o => items.push({ label: (o.length > 46 ? o.substr(0, 44) + '...' : o), desc: o, goal: true }));
     const col = journalCollection();
-    items.push({ label: '- ' + col.title + ': ' + S.bottles.length + ' / ' + col.list.length + ' -', disabled: false, desc: col.hint, sep: true });
-    S.bottles.slice().sort().forEach(i => items.push({ label: col.list[i].t, icon: col.icon, desc: 'Read this.', letter: i }));
+    if (!col.when || col.when()) {
+      items.push({ label: '- ' + col.title + ': ' + S.bottles.length + ' / ' + col.list.length + ' -', disabled: false, desc: col.hint, sep: true });
+      // some collections list every entry, with a hint for the ones still to find
+      if (col.showAll) col.list.forEach((e, i) => items.push(S.bottles.includes(i) ? { label: e.t, icon: col.icon, desc: 'Read this.', letter: i } : { label: '? ' + e.todo, desc: e.hint, goal: true }));
+      else S.bottles.slice().sort().forEach(i => items.push({ label: col.list[i].t, icon: col.icon, desc: 'Read this.', letter: i }));
+    }
     const i = await Menu.list({ title: 'Journal', subtitle: 'Day ' + S.day, items, w: 330, rows: 10 });
     if (i < 0) return;
     const it = items[i];

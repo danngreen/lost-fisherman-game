@@ -517,6 +517,7 @@ function boot() {
   Game.scenes.intro = IntroScene;
   registerPlaces();
   if (typeof registerChapter2 === 'function') registerChapter2();
+  if (typeof registerChapter3 === 'function') registerChapter3();
   registerSeaScenes();
   Game.scenes.whale = WhaleScene;
   Game.scenes.epilogue = EpilogueScene;

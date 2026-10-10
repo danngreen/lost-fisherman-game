@@ -88,10 +88,12 @@ const Inv = {
 function flag(k) { return !!S.f[k]; }
 function setFlag(k, v) { S.f[k] = v === undefined ? true : v; }
 
+// S.vessel says which boat you are sailing: Pip (S.boat) or, in Chapter III, the Wren
 function boatCfg() {
+  if (S.vessel === 'wren') return { type: 'wren', sail: flag('redSail') ? 'red' : 'white' };
   return { type: S.boat || 'row', iron: flag('ironHull'), lantern: flag('lantern'), iceBow: flag('iceBow') };
 }
-function maxHull() { return flag('ironHull') ? 6 : 3; }
+function maxHull() { return S.vessel === 'wren' ? 3 : flag('ironHull') ? 6 : 3; }
 
 // ---------------- time ----------------
 const Clock = {

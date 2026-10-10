@@ -246,7 +246,7 @@ const VoyageScene = {
     const st = this.style = chap().voyageStyle(p.from, p.to, this.escort);
     const cost = p.cost || routeCost(p.from, p.to) || 1;
     this.cost = cost;
-    this.L = this.escort ? (p.length || 2600) : cost * 1100;
+    this.L = p.length || (this.escort ? 2600 : cost * 1100);
     this.d = 0; this.t = 0;
     this.lane = 1; this.ly = LANES[1];
     this.hull = maxHull();
@@ -256,7 +256,13 @@ const VoyageScene = {
     this.done = false;
     this.notice = null;
     this.flash = 0;
-    this.base = { row: 46, sail: 70, big: 92 }[S.boat || 'row'];
+    this.base = S.vessel === 'wren' ? 104 : { row: 46, sail: 70, big: 92 }[S.boat || 'row'];
+    // towing another boat home on a line (Chapter III)
+    this.tow = p.tow ? { lane: 1, ly: LANES[1], history: [], hp: 3, hit: 0 } : null;
+    if (this.tow) this.base *= 0.8;
+    // a race against other boats (Chapter III regatta)
+    this.race = p.race ? { rivals: (st.rivals || []).map((r, i) => Object.assign({ d: 0, lane: i % 3, ly: LANES[i % 3], boost: 0 }, r)), boost: 0, place: 0 } : null;
+    this.chatT = 6;
     this.rough = st.rough;
     this.clouds = new CloudLayer(17 + cost, 9, 18, 90, 0.08, st.clouds, 2200);
     this.spawn();
@@ -298,7 +304,13 @@ const VoyageScene = {
       const near = E.filter(o => (o.k === 'rock' || o.k === 'ice') && Math.abs(o.x - E[i].x) < 40);
       if (new Set(near.map(o => o.lane)).size >= 3) E[i].x += 60;
     }
-    if (this.escort) return;
+    if (this.race) {
+      for (let i = 0; i < Math.floor(L / 260); i++) E.push({ k: 'gust', x: 400 + r() * (L - 700), lane: Math.floor(r() * 3), w: 50 });
+      return;
+    }
+    const nKelp = Math.floor(L / 1100 * (st.kelp || 0));
+    for (let i = 0; i < nKelp; i++) E.push({ k: 'kelp', x: 400 + r() * (L - 700), lane: Math.floor(r() * 3), w: 50 + r() * 40 });
+    if (this.escort || this.tow) return;
     const nCrates = Math.max(1, Math.floor(L / 700));
     for (let i = 0; i < nCrates; i++) E.push({ k: 'crate', x: 250 + r() * (L - 400), lane: Math.floor(r() * 3) });
     const nSchools = Math.max(1, Math.floor(L / 900));
@@ -334,6 +346,8 @@ const VoyageScene = {
     if (Input.held('left')) target = 0.15;
     const follow = this.escort && this.style.escort === 'follow';
     if (follow && this.calf.lag > 140) target = Math.min(target, 0.25); // wait for the calf
+    if (this.inKelp) target = Math.min(target, 0.45);
+    if (this.race && this.race.boost > 0) { this.race.boost -= dt; target = Math.max(target, 2.1); }
     this.speedMul = lerp(this.speedMul, target, dt * 2);
     this.ly = lerp(this.ly, LANES[this.lane], dt * 6);
     const wea = this.weather();
@@ -349,12 +363,15 @@ const VoyageScene = {
     const bx = this.d + this.boatX();
     const laneNow = Math.round((this.ly - LANES[0]) / (LANES[1] - LANES[0]));
     this.prompt = null;
+    this.inKelp = false;
     for (const e of this.ents) {
       if (e.gone) continue;
       const dx = e.x - bx;
       const hazard = e.k === 'rock' || e.k === 'ice';
       if (hazard && Math.abs(dx) < (e.big ? 16 : 12) && e.lane === laneNow && this.inv <= 0) {
-        this.hull--; this.inv = 1.6; this.shake = 0.5; e.hit = true; Sound.sfx('bump');
+        this.inv = 1.6; this.shake = 0.5; e.hit = true; Sound.sfx('bump');
+        if (this.race) { this.speedMul = 0.2; this.notice = { text: 'Bump! You lost speed on the rocks.', t: 0, dur: 2 }; continue; }
+        this.hull--;
         if (this.hull <= 0) { this.sink(); return; }
         Toast.show((e.k === 'ice' ? 'You hit the ice!' : 'Your hull scraped a rock!') + ' (' + this.hull + ' left)', 'heart');
       }
@@ -363,12 +380,30 @@ const VoyageScene = {
         if (e.k === 'crate') this.salvage();
         else Game.run(() => this.foundBottle(e.letter));
       }
+      if (e.k === 'kelp' && e.lane === laneNow && dx < e.w / 2 && dx > -e.w / 2) {
+        this.inKelp = true;
+        if (!this.kelpHint) { this.kelpHint = true; this.notice = { text: 'Kelp! It tangles round the rudder. Steer into clear water.', t: 0, dur: 3.5 }; }
+      }
+      if (e.k === 'gust' && !e.gone && e.lane === laneNow && Math.abs(dx) < e.w / 2) {
+        e.gone = true; this.race.boost = 1.6; Sound.sfx('whoosh');
+        if (!this.gustHint) { this.gustHint = true; this.notice = { text: 'A gust of wind fills the sail! Catch the sparkles to speed up.', t: 0, dur: 3.5 }; }
+      }
       if (e.k === 'school' && dx < e.w / 2 && dx > -e.w / 2) {
         if (this.speedMul < 0.5) this.prompt = e;
         else if (!this.schoolHint) { this.schoolHint = true; this.notice = { text: 'Birds diving! Slow down (hold Left) to fish here.', t: 0, dur: 4 }; }
       }
     }
     if (follow) this.updateCalf(dt);
+    if (this.tow) { this.updateTow(dt); if (this.done) return; }
+    if (this.race) this.updateRace(dt);
+    if (this.style.chatter && !this.notice) {
+      this.chatT -= dt;
+      if (this.chatT <= 0) {
+        this.chatT = 14 + Math.random() * 8;
+        const line = this.style.chatter(this);
+        if (line) this.notice = { text: line, t: 0, dur: 5 };
+      }
+    }
     if (this.prompt && Input.pressed('act')) {
       Input.consume('act');
       Game.run(() => goFishing({ rodX: this.boatX() + 6, rodY: this.ly - 14, waterY: this.ly + 2, dir: 1, spot: this.style.fishSpot }));
@@ -391,6 +426,53 @@ const VoyageScene = {
         e.calfHit = true; c.scared = 1.6; Sound.sfx('bump'); Sound.whale(0.1);
         this.notice = { text: 'The calf bumped the ice and got scared! Slow down and let it catch up.', t: 0, dur: 3.5 };
       }
+    }
+  },
+  towX() { return this.d + this.boatX() - 66; },
+  // the towed boat copies your lane a moment later, and takes knocks from anything you steer it into
+  updateTow(dt) {
+    const tw = this.tow;
+    tw.history.push(this.lane);
+    if (tw.history.length > 40) tw.lane = tw.history.shift();
+    tw.ly = lerp(tw.ly, LANES[tw.lane], dt * 4);
+    if (tw.hit > 0) tw.hit -= dt;
+    const tx = this.towX();
+    const tl = Math.round((tw.ly - LANES[0]) / (LANES[1] - LANES[0]));
+    for (const e of this.ents) {
+      if ((e.k !== 'ice' && e.k !== 'rock') || e.gone || e.towHit) continue;
+      if (Math.abs(e.x - tx) < (e.big ? 16 : 12) && e.lane === tl && tw.hit <= 0) {
+        e.towHit = true; tw.hp--; tw.hit = 1.2; Sound.sfx('bump');
+        if (tw.hp <= 0) { this.towSank(); return; }
+        this.notice = { text: 'Crunch! The Wren hit ' + (e.k === 'ice' ? 'the ice' : 'a rock') + '. She follows your path, so steer for both of you! (' + tw.hp + ' left)', t: 0, dur: 4 };
+      }
+    }
+  },
+  towSank() {
+    this.done = true;
+    Game.run(async () => {
+      await Dlg.narrate("The Wren is taking on water! Grandpa bails like mad while you turn back to " + locs()[this.from].name + ', towing her slowly through the calm.');
+      Clock.advance(2);
+      const L = locs()[this.from];
+      Game.goto(L.scene, { x: L.dock });
+    });
+  },
+  updateRace(dt) {
+    const R = this.race;
+    for (const rv of R.rivals) {
+      if (rv.fin) continue;
+      // rivals sail steadily, dodge rocks, and ease off or push to keep the race close
+      const gap = rv.d - this.d;
+      const band = gap > 220 ? 0.82 : gap < -260 ? 1.12 : 1;
+      const v = this.base * rv.speed * band * (rv.boost > 0 ? 1.4 : 1);
+      if (rv.boost > 0) rv.boost -= dt;
+      rv.d += v * dt;
+      const rx = rv.d + this.boatX();
+      const ahead = this.ents.find(e => e.k === 'rock' && e.lane === rv.lane && e.x - rx > 0 && e.x - rx < 90);
+      if (ahead) rv.lane = rv.lane === 1 ? (ahead.x % 2 < 1 ? 0 : 2) : 1;
+      const g = this.ents.find(e => e.k === 'gust' && !e.gone && Math.abs(e.x - rx) < 20 && e.lane === rv.lane);
+      if (g && Math.random() < 0.3) { g.gone = true; rv.boost = 1.2; }
+      rv.ly = lerp(rv.ly, LANES[rv.lane], dt * 3);
+      if (rv.d >= this.L) { rv.fin = true; R.place++; }
     }
   },
   salvage() {
@@ -423,6 +505,8 @@ const VoyageScene = {
   arrive() {
     this.done = true;
     if (this.escort) { this.style.onEscortArrive(); return; }
+    if (this.race) { this.style.onRaceEnd(this.race.place + 1); return; }
+    if (this.style.onArrive && this.style.onArrive(this.to, this)) return;
     const L = locs()[this.to];
     Game.goto(L.scene, { x: L.dock });
   },
@@ -459,7 +543,7 @@ const VoyageScene = {
       }
       items.push({
         y: this.ly + 0.5, f: () => {
-          const riders = this.escort ? st.escortRiders : [PEOPLE.player.top];
+          const riders = this.escort ? st.escortRiders : st.riders ? st.riders() : [PEOPLE.player.top];
           const blink = this.inv > 0 && Math.floor(this.inv * 10) % 2 === 0;
           if (!blink) boatInfo = drawBoat(w, boatCfg(), this.boatX(), this.ly, t, { riders, rowing: this.speedMul > 0.3, rough: this.rough, phase: this.d });
           else boatInfo = { lantern: null };
@@ -484,6 +568,24 @@ const VoyageScene = {
         this.calfY = this.calf.ly - cw.cy - 3 + Math.sin(t * 1.6) * 1.5;
         items.push({ y: this.calf.ly - 0.2, f: () => { drawWhale(w, this.calfX, this.calfY, t, 0, { s: 0.42 }); waterFront(w, this.calfX, this.calfX + cw.L, this.calf.ly - 1, t, pal, 0.7); } });
       }
+      if (this.tow) {
+        const tw = this.tow, tx = this.boatX() - 66;
+        const blink = tw.hit > 0 && Math.floor(tw.hit * 10) % 2 === 0;
+        items.push({
+          y: tw.ly + 0.4, f: () => {
+            const bob = waveY(tx + this.d, t, this.rough) * 0.6;
+            line(w, this.boatX() - 40, this.ly - 2, tx + 22, tw.ly - 3 + bob, '#c8b890');
+            if (!blink) drawBoat(w, { type: 'wren', sail: 'none' }, tx, tw.ly, t, { rough: this.rough, phase: this.d - 66 });
+            waterFront(w, tx - 24, tx + 26, tw.ly + 1, t + this.d * 0.02, pal, 0.55);
+          },
+        });
+      }
+      if (this.race) for (const rv of this.race.rivals) {
+        const rx = this.boatX() + rv.d - this.d;
+        if (rx < -80 || rx > W + 80) continue;
+        items.push({ y: rv.ly + 0.3, f: () => { drawBoat(w, rv.cfg, rx, rv.ly, t, { riders: rv.riders ? rv.riders() : [], rough: this.rough, phase: rv.d }); waterFront(w, rx - 30, rx + 32, rv.ly + 1, t + rv.d * 0.02, pal, 0.55); } });
+      }
+      if (this.race && st.finishDraw) { const fx = this.boatX() + this.L - this.d; if (fx > -80 && fx < W + 200) items.push({ y: LANES[0] - 2, f: () => st.finishDraw(w, fx, t, pal) }); }
       items.sort((a, b) => a.y - b.y).forEach(i => i.f());
       w.restore();
     }, h, wea);
@@ -506,9 +608,14 @@ const VoyageScene = {
     const u = clamp(this.d / this.L, 0, 1);
     rect(c, px0, py + 4, pw * u, 1, '#e8dcc0');
     rect(c, px0 + pw * u - 1, py + 1, 3, 6, '#ffd25a');
-    drawText(c, locs()[this.from].name, px0, py + 7, '#8a94a8');
-    drawText(c, locs()[this.to].name, px0 + pw, py + 7, '#dfe6f2', { align: 'right' });
-    if (!this.escort || follow) {
+    drawText(c, this.race ? 'Start' : locs()[this.from].name, px0, py + 7, '#8a94a8');
+    drawText(c, this.race ? 'Finish' : locs()[this.to].name, px0 + pw, py + 7, '#dfe6f2', { align: 'right' });
+    if (this.race) for (const rv of this.race.rivals) rect(c, px0 + pw * clamp(rv.d / this.L, 0, 1) - 1, py + 2, 2, 4, rv.mark || '#c8c8c8');
+    if (this.tow) {
+      drawText(c, 'Wren', 6, 31, '#dfe6f2');
+      for (let i = 0; i < 3; i++) { c.drawImage(ICONS.heart, 30 + i * 9, 30); if (i >= this.tow.hp) { c.globalAlpha = 0.75; rect(c, 30 + i * 9, 30, 8, 8, '#0e1220'); c.globalAlpha = 1; } }
+    }
+    if ((!this.escort || follow) && !this.race) {
       for (let i = 0; i < maxHull(); i++) c.drawImage(ICONS.heart, 6 + i * 9, 20);
       for (let i = this.hull; i < maxHull(); i++) { c.globalAlpha = 0.75; rect(c, 6 + i * 9, 20, 8, 8, '#0e1220'); c.globalAlpha = 1; }
     }
@@ -574,6 +681,22 @@ const VoyageScene = {
         const sx = x + i * 16, sy = y + 1 + Math.sin(t * 1.4 + i) * 1;
         rect(w, sx - 3, sy - 3, 7, 3, '#5a5f66'); rect(w, sx + 3, sy - 5, 3, 3, '#5a5f66'); px(w, sx + 5, sy - 4, '#101014');
       }
+    } else if (e.k === 'kelp') {
+      for (let i = 0; i < e.w; i += 3) {
+        const kx = x - e.w / 2 + i, sway = Math.sin(t * 1.5 + i * 0.4) * 1.5;
+        const hh = 2 + Math.round(hash2(i, Math.floor(e.x)) * 3);
+        for (let j = 0; j < hh; j++) px(w, kx + (j === hh - 1 ? sway : 0), y + 3 - j, j === hh - 1 ? '#8a9a3a' : '#5a6a2a');
+        if (i % 9 === 0) ellipse(w, kx + 1, y + 2, 2, 1, '#6a5a24');
+      }
+    } else if (e.k === 'gust') {
+      for (let i = 0; i < 6; i++) {
+        const ph = (t * 1.8 + i / 6) % 1;
+        const gx = x + e.w / 2 - ph * e.w, gy = y - 6 - (i % 3) * 4 + Math.sin(t * 3 + i) * 1;
+        w.globalAlpha = Math.sin(ph * Math.PI) * 0.9;
+        rect(w, gx, gy, 5 + (i % 2) * 3, 1, '#ffffff');
+        w.globalAlpha = 1;
+      }
+      if (Math.floor(t * 6 + e.x) % 4 === 0) px(w, x, y - 12, '#fff6c0');
     } else if (e.k === 'glow') {
       const a = 0.4 + 0.3 * Math.sin(t * 1.2 + e.x);
       lights.push({ x, y: y + 8, r: 16, col: '#7ff7e8', a, always: true });
