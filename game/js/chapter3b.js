@@ -879,6 +879,7 @@ async function c3TobySaltmere() {
   const lines = [
     "Saltmere! It's so... GREEN. Are all the people here this cheerful? It's exhausting.",
     "Oskar says Hookness herring are the best herring. Finn says Saltmere herring. I've told them they're both wrong. Ness End herring. They've stopped speaking to me. It's wonderful.",
+    "Uncle Will ran away to sea. Then Maggie ran away to sea. Then I ran away to a rock. Hartleys are very bad at staying put.",
     flag('regattaDay') ? "Today we race. Maggie raced the Wren round Hookness bay every summer. She never lost. Not once." : "Your grandmother used to say the south was where the sea was warm. It's not warm. She lied. Ha!",
   ];
   await Dlg.say('toby', lines[(S.f.toby3 = (S.f.toby3 || 0) + 1) % lines.length]);

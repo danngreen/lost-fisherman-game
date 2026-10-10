@@ -449,7 +449,11 @@ async function c3Oskar() {
     setFlag('oskarToby');
     await Dlg.narrate('You show Oskar the family photograph.');
     await Dlg.say('oskar', "...Old John Hartley. Maggie. And little Toby. Tobias. Her baby brother.");
-    await Dlg.say('ansel', "A brother. HARTLEY & SONS. I walked past that sign. She had a little brother, and she never told me.");
+    await Dlg.say('ansel', "A brother. She had a little brother, and she never told me.");
+    await Dlg.say('you', "But the sign on the cannery says HARTLEY & SONS. Who was the other son?");
+    await Dlg.say('oskar', "Ha! That sign's older than me. Maggie's grandfather painted it when he built the cannery, for his two boys: John, and John's big brother Will.");
+    await Dlg.say('oskar', "Will ran off to sea at sixteen and never came back. Old Hartley never changed the sign. Hartleys never change anything.");
+    await Dlg.say('oskar', "Except Maggie. When she was ten she scratched '& DAUGHTER' underneath it with a nail. Her father was furious for a week.");
     await Dlg.say('oskar', "He followed her everywhere, like a duckling. After she left, he stopped talking. Not a word, for a whole year.");
     await Dlg.say('oskar', "Then one morning his rowboat was gone. Rowed off east, into the Skerries, and never came back.");
     await Dlg.say('oskar', "Folk say there's a man living out there still, on the last rock. With a goat. But folk say all sorts.");
@@ -703,6 +707,7 @@ const C3_CANNERY = Object.assign({}, CANNERY, {
     boatObject(50, 'cannery'),
     anselObject(120, 'cannery'),
     ...sketchSpots('c3_cannery'),
+    { x: 356, r: 10, label: 'Read the sign', act: () => Dlg.narrate('HARTLEY & SONS. Underneath it, scratched into the paint with a nail, in small wobbly capitals: & DAUGHTER.' + (flag('oskarToby') ? ' Maggie, aged ten.' : '')) },
     { x: 411, r: 16, label: 'Peer through the cannery doors', act: () => Dlg.narrate('Rows of silent machines under a blanket of dust, and a calendar on the wall still showing April, 1974.') },
     { x: 626, r: 10, label: 'Read the notice board', act: () => Dlg.narrate('"BY ORDER OF J. HARTLEY. THE WEIR AT THE NARROWS IS CLOSED. FOR GOOD." Somebody has crossed out FOR GOOD and written, in big new letters: NOT ANY MORE.') },
     { x: 740, r: 12, label: "Oskar's cottage", act: () => Dlg.narrate("Oskar's cottage is shut up for the summer. A note on the door says: GONE SOUTH. FEED YOURSELVES. It is addressed to the gulls.") },
@@ -849,7 +854,7 @@ async function c3FamPhoto() {
   await Dlg.narrate('On the back: "John, Margaret and Tobias. 1972."');
   Inv.add('famphoto'); Sound.sfx('pickup');
   if (flag('anselCrew')) {
-    await Dlg.say('ansel', "Tobias. 'HARTLEY & SONS.' ...She had a little brother. Fifty years, and she never said a word.");
+    await Dlg.say('ansel', "Tobias. ...She had a little brother. Fifty years, and she never said a word.");
     await Dlg.say('ansel', "Oskar would know what happened to him. Let's ask him when we're home.");
   }
 }

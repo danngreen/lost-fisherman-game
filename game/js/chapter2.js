@@ -622,6 +622,7 @@ const CANNERY = {
     for (let i = 0; i < 246; i++) rect(c, 292 + i, 122 + Math.abs(i - 123) * 0.08, 1, 14, i % 5 === 0 ? '#5a3a2a' : '#8a4e32');
     drawWreckSign(c, 342, 142, 'HOOKNESS CANNERY', '#e8dcc0', '#3a2a1a');
     drawWreckSign(c, 362, 158, 'HARTLEY & SONS', '#2a3a4a', '#e8dcc0');
+    for (let i = 0; i < 34; i += 2) if (hash2(i, 41) > 0.35) px(c, 380 + i, 173 + (i % 3 === 0 ? 1 : 0), '#b8c4c8');
     rect(c, 386, 176, 50, 38, '#2a2420');
     for (let j = 0; j < 38; j += 4) rect(c, 386, 176 + j, 50, 1, '#4a3a30');
     rect(c, 400, 180, 22, 6, '#1a1612');
@@ -681,6 +682,7 @@ const CANNERY = {
   npcs: [{ id: 'oskar', x: 770 }],
   objects: [
     boatObject(50, 'cannery'),
+    { x: 356, r: 10, label: 'Read the sign', act: () => Dlg.narrate('A faded sign: HARTLEY & SONS. Underneath it, scratched into the paint with a nail, in small wobbly capitals: & DAUGHTER.') },
     { x: 411, r: 16, label: 'Peer through the cannery doors', act: () => Dlg.narrate('Through a gap in the boards: rows of silent machines under a blanket of dust, and a calendar on the wall still showing April, 1974.') },
     {
       x: 576, r: 16, label: 'Search the scrap heap', act: async () => {
