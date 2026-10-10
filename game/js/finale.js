@@ -207,10 +207,13 @@ const EpilogueScene = {
     this.ep = EPILOGUES[S.ch || 1];
     this.cards = this.ep.cards;
   },
+  // Each card waits for the reader. Presses in its first moments are ignored,
+  // so tapping through the last dialogue doesn't skip the ending.
   update(dt, free) {
-    this.t += dt; this.ct += dt;
+    this.t += dt;
     if (!free) return;
-    if ((Input.pressed('act') && this.ct > 0.8) || this.ct > 7) {
+    this.ct += dt;
+    if (Input.pressed('act') && this.ct > 1.5) {
       this.i++; this.ct = 0;
       if (this.i > this.cards.length + 1) Game.goto('title');
     }
@@ -240,7 +243,10 @@ const EpilogueScene = {
       this.ep.final.forEach((l, k) => drawText(c, l, W / 2, 60 + k * 14, k === 1 ? UIC.hi : '#f4ecd8', { align: 'center', shadow: '#000' }));
     }
     c.globalAlpha = 1;
-    drawText(c, '[E]', W - 20, H - 14, '#5a6070');
+    const ready = this.ct > 2 ? 0.6 + 0.4 * Math.sin(this.t * 3) : 0.35;
+    c.globalAlpha = ready;
+    drawText(c, '[E] continue', W - 12, H - 14, this.ct > 2 ? '#c8d0e0' : '#5a6070', { align: 'right' });
+    c.globalAlpha = 1;
   },
 };
 
