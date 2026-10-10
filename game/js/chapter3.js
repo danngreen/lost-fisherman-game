@@ -282,9 +282,8 @@ const C3_VILLAGE = Object.assign({}, VILLAGE, {
     drawBunting(w, 701 - cam, 152, 1001 - cam, 152, t, 4);
     // the Wren on the trestles at Bo's, or moored at the pier
     if (flag('wrenHome') && !flag('wrenReady')) {
-      const b = makeBoat({ type: 'wren', sail: flag('wrenFixed') ? 'white' : 'none' });
+      const b = makeBoat({ type: 'wren', sail: flag('wrenFixed') ? 'white' : 'none', named: flag('wrenNamed') });
       w.drawImage(b.c, Math.round(743 - cam - b.c.width / 2), 207 - b.wl - 2);
-      if (flag('wrenNamed')) drawText(w, 'WREN', 748 - cam, 199, '#e8e0d0');
     }
     if (flag('tobyArrived') && typeof c3RegattaMid === 'function') c3RegattaMid(w, sc, cam, t);
   },
@@ -293,7 +292,7 @@ const C3_VILLAGE = Object.assign({}, VILLAGE, {
     if (px0 < W) {
       // Pip, and the Wren once she's ready
       if (S.boat) drawBoat(w, { type: S.boat, iron: flag('ironHull'), lantern: flag('lantern'), iceBow: flag('iceBow') }, 1150 - cam, 241, t, {});
-      if (flag('wrenReady')) drawBoat(w, { type: 'wren', sail: flag('redSail') ? 'red' : 'white' }, 1092 - cam, 241, t, { phase: 30 });
+      if (flag('wrenReady')) drawBoat(w, { type: 'wren', sail: flag('redSail') ? 'red' : 'white', named: true }, 1076 - cam, 241, t, { phase: 30 });
       frontWater(w, 240, t, 'north', px0, W, cam);
     }
     // the whales come into the harbour for the bonfire
@@ -320,7 +319,7 @@ const C3_VILLAGE = Object.assign({}, VILLAGE, {
     { x: 968, label: 'Talk to Nell', act: () => c3Nell() },
     { x: 1190, r: 14, label: 'Talk to Grandpa and Greta', when: () => !flag('openingDone'), act: () => c3Opening() },
     { x: 1122, r: 8, label: 'Talk to Grandpa', when: () => flag('openingDone'), act: () => c3AnselHome() },
-    { x: 1092, r: 12, label: 'Board the Wren', when: () => flag('wrenReady') && !flag('regattaDay'), act: async () => { S.vessel = 'wren'; await setSail('saltmere'); } },
+    { x: 1076, r: 12, label: 'Board the Wren', when: () => flag('wrenReady') && !flag('regattaDay'), act: async () => { S.vessel = 'wren'; await setSail('saltmere'); } },
     { x: 1150, r: 16, label: 'Board Pip', when: () => flag('openingDone') && !flag('regattaDay'), act: async () => { S.vessel = 'pip'; await setSail('saltmere'); } },
     { x: 1228, r: 10, label: 'Fish off the pier', when: () => flag('openingDone'), act: sc => fishHere(sc, 1230, 246, 1) },
   ],

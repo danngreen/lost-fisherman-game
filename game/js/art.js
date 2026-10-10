@@ -424,7 +424,7 @@ function drawPerson(c, p, x, gy, o) {
 
 // ---------------- boats ----------------
 const _boatCache = {};
-function boatKey(cfg) { return [cfg.type, cfg.iron ? 1 : 0, cfg.lantern ? 1 : 0, cfg.iceBow ? 1 : 0, cfg.color || '', cfg.sail || ''].join('|'); }
+function boatKey(cfg) { return [cfg.type, cfg.iron ? 1 : 0, cfg.lantern ? 1 : 0, cfg.iceBow ? 1 : 0, cfg.color || '', cfg.sail || '', cfg.named ? 1 : 0].join('|'); }
 
 // returns {c, wl (waterline y in canvas), bowX, len, mastTop, lanternPos, seat}
 function makeBoat(cfg) {
@@ -538,6 +538,15 @@ function makeBoat(cfg) {
         }
       }
       rect(x, ox + 4, oy - 3, mx - ox - 3, 1, '#6a4a2c');
+    }
+    // her name on the bow, in letters small enough to fit
+    if (cfg.named) {
+      const glyphs = [['x...x', 'x...x', 'x.x.x', '.x.x.'], ['xx.', 'x.x', 'xx.', 'x.x'], ['xxx', 'xx.', 'x..', 'xxx'], ['x..x', 'xx.x', 'x.xx', 'x..x']];
+      let gx = ox + 18;
+      for (const g of glyphs) {
+        g.forEach((row, j) => { for (let k = 0; k < row.length; k++) if (row[k] === 'x') px(x, gx + k, oy + 2 + j, '#e8e0d0'); });
+        gx += g[0].length + 1;
+      }
     }
     info.mastX = mx; info.mastTop = mt;
     info.seatX = ox + 6;
