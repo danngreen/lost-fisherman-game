@@ -6,7 +6,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   const errs = [];
   page.on('pageerror', e => errs.push('PAGEERR ' + e.message));
   page.on('console', m => { if (m.type() === 'error') errs.push(m.text()); });
-  await page.goto('file:///Users/dann/gamedev/fisherman/game/index.html');
+  await page.goto('file://' + require('path').resolve(__dirname, '../game/index.html'));
   await sleep(1000);
   const out = await page.evaluate(async () => {
     const log = [];

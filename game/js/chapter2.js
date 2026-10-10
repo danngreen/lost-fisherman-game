@@ -856,11 +856,12 @@ const NARROWS = {
     sc.backs = null;
     if (sc.whalesHere && beyond) { w.globalAlpha = 0.7; sc.backs = drawWhaleBacks(w, 300 + cx, 182, t, false); w.globalAlpha = 1; }
     drawWeir(w, Math.round(150 + cx), Math.round(560 + cx), 192, open, t);
-    if (sc.whalesHere && !beyond) sc.backs = drawWhaleBacks(w, 210 + cx + (sc.whaleSwim || 0), 200, t, false);
+    // sit the whales on the waterline at the foot of the gate posts
+    if (sc.whalesHere && !beyond) sc.backs = drawWhaleBacks(w, 210 + cx + (sc.whaleSwim || 0), 208, t, false);
   },
   drawMid(w, sc, cam, t) {
     if (S.boat) drawBoat(w, boatCfg(), 36 - cam, 239, t, {});
-    drawWinchHouse(w, 520 - cam, this.ground(540), sc.gear || 0);
+    drawWinchHouse(w, 520 - cam, this.ground(540), sc.gear || 0, 520);
   },
   drawFront(w, sc, cam, t) { frontWater(w, 238, t, 'arctic', 0, 90 - cam, cam); frontWater(w, 238, t, 'arctic', 670 - cam, W, cam); },
   emissive(c, sc, cam, t, nf) {

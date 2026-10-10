@@ -113,12 +113,14 @@ function drawSeaStack(c, x0, base, sw, sh, seed, far) {
 }
 
 // ---------------- buildings & structures ----------------
-function corrugated(c, x, y, w, h, col, dark, rust) {
+// seed: world x for the rust pattern, so it doesn't change as the camera moves
+function corrugated(c, x, y, w, h, col, dark, rust, seed) {
+  const sx = seed !== undefined ? seed : x;
   for (let i = 0; i < w; i++) {
     const base = i % 3 === 0 ? dark : i % 3 === 1 ? col : shade(col, 1.08);
     for (let j = 0; j < h; j++) {
       let cc = base;
-      if (rust && hash2(Math.floor((x + i) / 3), Math.floor((y + j) / 4)) > 0.78) cc = (j + i) % 4 ? '#8a4a2a' : '#6a3a20';
+      if (rust && hash2(Math.floor((sx + i) / 3), Math.floor((y + j) / 4)) > 0.78) cc = (j + i) % 4 ? '#8a4a2a' : '#6a3a20';
       if (j === 0) cc = dark;
       px(c, x + i, y + j, cc);
     }
@@ -162,8 +164,8 @@ function drawWeir(c, x0, x1, waterY, open, t) {
   }
 }
 
-function drawWinchHouse(c, x, gy, gearAngle) {
-  corrugated(c, x, gy - 40, 46, 40, '#6a7a7e', '#4a5458', true);
+function drawWinchHouse(c, x, gy, gearAngle, seed) {
+  corrugated(c, x, gy - 40, 46, 40, '#6a7a7e', '#4a5458', true, seed);
   for (let i = 0; i < 56; i++) rect(c, x - 5 + i, gy - 46 + Math.abs(i - 28) * 0.2, 1, 6, i % 4 === 0 ? '#5a3a2a' : '#7a4a30');
   rect(c, x + 16, gy - 24, 14, 24, '#2a2420');
   // big gear wheel on the side
