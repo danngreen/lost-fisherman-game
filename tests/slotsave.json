@@ -1,0 +1,1 @@
+[{"js":"window.__SAVE_DATA__=\"\"; try{localStorage.clear()}catch(e){}; Save.load(); startChapter(1, 2); 1","wait":9000},{"js":"Game.sceneId"},{"keys":["Escape"],"wait":3500},{"js":"[Game.sceneId, Save.data.slots.map(s=>s&&(s.ch+\":\"+s.loc)), Save.data.last]"}]

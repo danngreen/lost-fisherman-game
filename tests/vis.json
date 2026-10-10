@@ -1,0 +1,10 @@
+[
+ {"js":"S=newState(); S.day=1; S.time=20.5; Game.setScene('village',{x:600}); Game.fade=0; Banner.cur=null; 1","wait":400,"shot":"m1_rise_day1"},
+ {"js":"S.day=1; S.time=3.5; 1","wait":300,"shot":"m2_set_day1"},
+ {"js":"S.day=4; S.time=23; 1","wait":300,"shot":"m3_day4"},
+ {"js":"S.day=6; S.time=23; 1","wait":300,"shot":"m4_day6"},
+ {"js":"S.day=8; S.time=23; 1","wait":300,"shot":"m5_day8"},
+ {"js":"S.day=2; S.time=11; S.inv.hatchet=1; S.f.iw0=1; S.f.coconutVisit=1; Game.setScene('coconut',{x:700}); Banner.cur=null; 1","wait":500,"shot":"i1_ironwood"},
+ {"js":"Game.setScene('epilogue'); EpilogueScene.i=EpilogueScene.cards.length; EpilogueScene.ct=2; 1","wait":400,"shot":"e1_endtitle"},
+ {"js":"EpilogueScene.i=EpilogueScene.cards.length+1; EpilogueScene.ct=2; 1","wait":400,"shot":"e2_final"}
+]

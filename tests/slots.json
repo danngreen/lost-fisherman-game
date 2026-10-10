@@ -1,0 +1,14 @@
+[
+ {"js":"window.__SAVE_DATA__=''; try{localStorage.clear()}catch(e){}; Save.load(); Game.setScene('title'); Game.fade=0; TitleScene.items.map(i=>i.label)"},
+ {"keys":["Enter"],"wait":500,"shot":"s1_newgame_slots"},
+ {"keys":["Enter"],"wait":1200,"js":"[Game.sceneId, S.slot, S.ch]"},
+ {"js":"window.__SAVE_DATA__=JSON.stringify({v:2,slots:{1:{v:1,ch:1,day:6,coins:30,inv:{},f:{ended:1},loc:'village',bottles:[]},2:{v:1,ch:2,day:2,coins:41,inv:{},f:{compassFound:1},loc:'puffin',bottles:[]}},unlocked:{2:true},last:2,settings:{music:5,sfx:7,sound:true}}); Save.load(); Game.setScene('title'); Game.fade=0; [TitleScene.items.map(i=>i.label), Save.data.slots.map(s=>s&&s.ch), Save.data.last]","wait":400},
+ {"keys":["Enter"],"wait":500,"shot":"s2_continue_slots"},
+ {"keys":["ArrowUp"],"wait":200,"shot":"s3_slot1_selected"},
+ {"keys":["Enter"],"wait":1500,"shot":"s4_offer_next_chapter"},
+ {"keys":["Escape"],"wait":400},
+ {"keys":["ArrowDown","Enter"],"wait":500},
+ {"keys":["Enter"],"wait":1500,"shot":"s5_clear_confirm"},
+ {"keys":["Enter"],"wait":500,"shot":"s6_pick_chapter"},
+ {"keys":["Escape"],"wait":400,"js":"[Save.data.slots.map(s=>s&&s.ch)]"}
+]

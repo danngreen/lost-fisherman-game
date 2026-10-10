@@ -1,0 +1,6 @@
+[
+ {"js":"window.__SAVE_DATA__=''; try{localStorage.clear()}catch(e){}; Save.load(); Game.setScene('title'); Game.fade=0; 1","wait":300},
+ {"keys":["Enter"],"wait":500,"js":"[!!Menu.active, Menu.active && Menu.active.title, Game.lock]"},
+ {"keys":["Enter"],"wait":100,"js":"[!!Menu.active, !!Dlg.active, Game.lock, Game.sceneId, Game.transitioning, Game.error]"},
+ {"wait":1500,"js":"[Game.sceneId, S.slot, S.ch, !!Menu.active, Game.lock]"}
+]
