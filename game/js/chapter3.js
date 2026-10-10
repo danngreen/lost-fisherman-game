@@ -84,6 +84,7 @@ async function matchSketch(sc, i) {
   sc.player.x = s.x; sc.player.facing = 1;
   await Dlg.narrate('You flip through the sketchbook and hold a drawing up against the view...');
   Game.hudHidden = true;
+  GoalNote.cur = null;
   await wait(0.2);
   Sketch.start('M.H.');
   Sound.sfx('lamp');
@@ -240,8 +241,8 @@ CHAPTER_OBJECTIVES[3] = () => {
 };
 
 // ---------------- extra people ----------------
-function addAnsel(npcs, x) { return npcs.concat([{ id: 'ansel', x, when: () => flag('anselCrew') && !flag('anselHome') }]); }
-function anselObject(x, place) { return { x, r: 12, label: 'Talk to Grandpa', when: () => flag('anselCrew') && !flag('anselHome'), act: () => c3AnselAt(place) }; }
+function addAnsel(npcs, x) { return npcs.concat([{ id: 'ansel', x, when: () => flag('anselCrew') }]); }
+function anselObject(x, place) { return { x, r: 12, label: 'Talk to Grandpa', when: () => flag('anselCrew'), act: () => c3AnselAt(place) }; }
 
 async function c3AnselAt(place) {
   const L = {
@@ -302,7 +303,7 @@ const C3_VILLAGE = Object.assign({}, VILLAGE, {
     { id: 'tam', x: 512 }, { id: 'bo', x: 690 }, { id: 'greta', x: 856 }, { id: 'nell', x: 968 },
     { id: 'ansel', x: 1180, when: () => !flag('openingDone') },
     { id: 'greta', x: 1200, when: () => !flag('openingDone') },
-    { id: 'ansel', x: 1122, when: () => flag('openingDone') && !flag('regattaDay') },
+    { id: 'ansel', x: 1122, when: () => flag('openingDone') },
   ],
   objects: [
     { x: 75, r: 10, label: "Enter Grandpa's cottage", act: () => { Sound.sfx('door'); Game.goto('c3_cottage', { x: 440, facing: -1 }); } },
@@ -313,10 +314,10 @@ const C3_VILLAGE = Object.assign({}, VILLAGE, {
     { x: 512, label: 'Talk to Tam', act: () => c3Tam() },
     { x: 690, label: 'Talk to Bo', act: () => c3Bo() },
     { x: 744, r: 16, label: 'Look at the Wren', when: () => flag('wrenHome') && !flag('wrenReady'), act: () => c3LookWren() },
-    { x: 856, label: 'Talk to Greta', act: () => c3Greta() },
+    { x: 856, label: 'Talk to Greta', when: () => !flag('regattaDay'), act: () => c3Greta() },
     { x: 968, label: 'Talk to Nell', act: () => c3Nell() },
     { x: 1190, r: 14, label: 'Talk to Grandpa and Greta', when: () => !flag('openingDone'), act: () => c3Opening() },
-    { x: 1122, r: 8, label: 'Talk to Grandpa', when: () => flag('openingDone') && !flag('regattaDay'), act: () => c3AnselHome() },
+    { x: 1122, r: 8, label: 'Talk to Grandpa', when: () => flag('openingDone'), act: () => c3AnselHome() },
     { x: 1092, r: 12, label: 'Board the Wren', when: () => flag('wrenReady') && !flag('regattaDay'), act: async () => { S.vessel = 'wren'; await setSail('saltmere'); } },
     { x: 1150, r: 16, label: 'Board Pip', when: () => flag('openingDone') && !flag('regattaDay'), act: async () => { S.vessel = 'pip'; await setSail('saltmere'); } },
     { x: 1228, r: 10, label: 'Fish off the pier', when: () => flag('openingDone'), act: sc => fishHere(sc, 1230, 246, 1) },
@@ -402,7 +403,6 @@ async function c3Hollis() {
     const items = [];
     if (flag('boList') && !flag('wrenFixed')) items.push({ label: 'Bolt of sailcloth', right: '20c', id: 'sailcloth', desc: 'Good stiff canvas for a small sail.', disabled: S.coins < 20 || Inv.has('sailcloth'), whyNot: Inv.has('sailcloth') ? 'One bolt is plenty.' : 'Not enough coins.' });
     items.push({ label: 'Lucky lure', right: '25c', id: 'lure', desc: 'Fish bite faster and are easier to keep on the line.', disabled: S.coins < 25 || Inv.has('lure'), whyNot: Inv.has('lure') ? 'You already have one.' : 'Not enough coins.' });
-    if (typeof c3HollisExtra === 'function') c3HollisExtra(items);
     items.push({ label: 'Chat', id: 'chat' }, { label: 'Leave', id: 'leave' });
     const i = await Menu.list({ title: 'Hollis & Co.', subtitle: S.coins + ' coins', items, w: 240, sel: Math.min(sel, items.length - 1) });
     if (i < 0 || items[i].id === 'leave') return;
@@ -410,7 +410,6 @@ async function c3Hollis() {
     const id = items[i].id;
     if (id === 'sailcloth') { S.coins -= 20; Inv.add('sailcloth'); Sound.sfx('coin'); await Dlg.say('hollis', 'Sailcloth. For the little Hookness boat? I shall give you the good bolt. Not the bolt the mice got at.'); }
     if (id === 'lure') { S.coins -= 25; Inv.add('lure'); Sound.sfx('coin'); }
-    if (items[i].buy) await items[i].buy();
     if (id === 'chat') await Dlg.say('hollis', ["Regatta entries close on Midsummer Day. Not that I sail. I prefer my water in a cup.", "Summer fish are worth a pretty penny. Sea trout especially. Tam will tell you the same, louder."][(S.f.hollis3 = (S.f.hollis3 || 0) + 1) % 2]);
   }
 }
@@ -543,7 +542,7 @@ async function c3Nell() {
 // ---------------- the cottage ----------------
 const C3_COTTAGE = Object.assign({}, C2_COTTAGE, {
   id: 'c3_cottage', name: 'The Cottage',
-  npcs: [{ id: 'ansel', x: 272, when: () => flag('anselHome') }],
+  npcs: [],
   objects: [
     {
       x: 49, r: 24, label: 'Sleep', act: async () => {
@@ -869,7 +868,7 @@ const C3_FLOE = {
   },
   drawMid(w, sc, cam, t) {
     drawBoat(w, boatCfg(), 20 - cam, 238, t, {});
-    if (!flag('wrenHome') && !sc.gone) {
+    if (!flag('wrenHome')) {
       const b = drawBoat(w, { type: 'wren', sail: 'none' }, 500 - cam, 240, t, { phase: 100, tilt: -0.05 });
       // rags of the old red sail on the mast
       const mx = b.x + b.b.mastX, mt = b.y + b.b.mastTop;
@@ -914,7 +913,6 @@ async function c3FloeWren(sc) {
   if (short > 0) await Dlg.narrate("You don't have enough food, so you set off hungry. It's going to be a long, grumbly trip.");
   else Toast.show('-' + cost + ' food', 'food');
   S.vessel = 'pip';
-  sc.gone = true;
   Game.goto('voyage', { from: 'floe', to: 'saltmere', cost, tow: true });
 }
 

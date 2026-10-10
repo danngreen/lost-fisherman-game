@@ -82,8 +82,6 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     await step('sketch ness end', () => sk(NESSEND));
     await step('toby no coffee', () => c3Toby());
     await step('ingrid toby', () => c3Ingrid());
-    S.coins += 10;
-    await step('buy coffee', () => c3Hollis(), ['coffee', 'Leave']);
     await step('toby coffee', () => act(NESSEND, 'Talk to the man'));
     await step('toby story', () => act(NESSEND, 'Talk to the man'));
     await step('oskar alive', () => c3Oskar());

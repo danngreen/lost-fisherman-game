@@ -5,7 +5,7 @@
 // ---------------------------------------------------------------------------
 
 Object.assign(ITEMS, {
-  coffee: { name: 'Bag of Coffee', type: 'key', desc: 'A big paper bag of dark roasted coffee from Hollis. It smells wonderful.' },
+  coffee: { name: 'Bag of Coffee', type: 'key', desc: "Ingrid's dark roasted coffee, for Toby. It smells wonderful." },
   letters: { name: "Maggie's Letters", type: 'key', desc: 'Fifty letters tied with a red ribbon, every one addressed "Toby", none of them ever posted.' },
   redsail: { name: 'The Red Sail', type: 'key', desc: 'A small sail of red canvas, sewn by hand fifty years ago. Folded so carefully it still has sharp creases.' },
   pimmap: { name: "Pim's Map", type: 'key', desc: 'A crayon map of the Skerries, showing the safe channels between the rocks. Fewer rocks on Skerries voyages.' },
@@ -26,8 +26,7 @@ function c3LateObjectives(o) {
   if (!flag('skerriesChart')) return;
   if (flag('tobyMet') && !flag('tobyCoffee')) {
     if (!flag('ingridToby')) o.push('Ask around the Skerries about the grumpy man at Ness End.');
-    else if (!Inv.has('coffee')) o.push('Toby is out of coffee. Buy a bag from Hollis in Saltmere.');
-    else o.push('Take the coffee to Ness End.');
+    else o.push("Take Ingrid's bag of coffee to Ness End.");
   }
   if (flag('tobyCoffee') && !flag('tobyStory')) o.push('Talk to the man at Ness End.');
   if (flag('tobyStory') && !Inv.has('letters') && !flag('lettersGiven')) o.push("Look in Maggie's trunk, in the attic of Grandpa's cottage.");
@@ -39,13 +38,6 @@ function c3LateObjectives(o) {
 }
 
 // ---------------- Saltmere hooks ----------------
-function c3HollisExtra(items) {
-  if (flag('ingridToby') && !flag('tobyCoffee')) items.push({
-    label: 'Bag of coffee', right: '10c', id: 'coffee', desc: 'Dark roasted coffee. For someone very grumpy.', disabled: S.coins < 10 || Inv.has('coffee'), whyNot: Inv.has('coffee') ? 'One bag is plenty.' : 'Not enough coins.',
-    buy: async () => { S.coins -= 10; Inv.add('coffee'); Sound.sfx('coin'); await Dlg.say('hollis', 'Coffee, for a hermit on a rock? Then he shall have the strongest I sell. It could wake a whale.'); },
-  });
-}
-
 async function c3TamLate() {
   if (!flag('tamFeast')) {
     if (Inv.has('halibut')) {
@@ -316,9 +308,10 @@ async function c3Ingrid() {
     await Dlg.say('you', 'There is a man at Ness End with a goat. He shouted at us.');
     await Dlg.say('ingrid', "Toby? Ha! He shouts at everybody. He shouts at the weather. Don't take it personally.");
     await Dlg.say('ingrid', "He rows over once a month to swap fish for coffee. But his boat sprang a leak in the spring, and he hasn't been since. He'll have run out of coffee weeks ago.");
-    await Dlg.say('ingrid', "A grumpy man with no coffee is a very grumpy man. Bring him a bag of coffee, and I promise you he'll at least open his door.");
-    await Dlg.say('ansel', "Hollis sells coffee, in Saltmere. Strong enough to wake a whale, he says.");
-    Sound.sfx('quest');
+    await Dlg.say('ingrid', "A grumpy man with no coffee is a very grumpy man. I'd row it over myself, but I can't leave my ducks while they're nesting.");
+    await Dlg.narrate('Ingrid goes into the turf house and comes back with a big paper bag.');
+    await Dlg.say('ingrid', "Here. His usual. Take it to him, and I promise you he'll at least open his door.");
+    Inv.add('coffee'); Sound.sfx('quest');
     return;
   }
   let sel = 0;
@@ -462,7 +455,7 @@ async function c3Toby() {
     await Dlg.say('toby', '"Was."');
     await Dlg.say('ansel', "She was my wife, for nearly fifty years. I'm sorry, Toby. We lost her a few winters ago.");
     await Dlg.narrate('Toby puts his mug down very carefully on the bench. The goat leans against his legs.');
-    await Dlg.say('toby', "I was nine. The night she took the gear out of the winch, I saw her do it. I followed her down to the Narrows in my pyjamas.");
+    await Dlg.say('toby', "I was nine. The night she took the gear out of the winch, I saw her creep home with it under her coat. I followed her up to the attic in my pyjamas.");
     await Dlg.say('toby', "In the morning Father stood in the kitchen and asked me where it was. He was so angry. And I... I told him. I told the truth, like she always said to.");
     await Dlg.say('toby', "He shut the weir by hand, with ropes and twenty men. And that night she sailed away in the Wren. She looked back at me from the boat, just once. And I never saw her again.");
     await Dlg.say('toby', "She never wrote. Not a single letter, in fifty years. Why would she? I was the one who told.");
@@ -611,7 +604,8 @@ async function c3Ending() {
 
 function c3RegattaMid(w, sc, cam, t) {
   if (flag('bonfire')) drawBonfire(w, 980 - cam, 222, t);
-  // Admiral wanders the harbour
+  // Admiral wanders the harbour, and settles at Toby's feet for the bonfire
+  if (flag('bonfire')) { drawGoat(w, 1040 - cam, 222, t, true, false); return; }
   const gx = 470 + Math.sin(t * 0.25) * 30;
   drawGoat(w, gx - cam, 222, t, Math.cos(t * 0.25) < 0, Math.sin(t * 0.25) > 0.7);
 }
