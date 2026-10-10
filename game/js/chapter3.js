@@ -756,36 +756,43 @@ const HARTLEY = {
     for (let x = 30; x < 480; x += 70) rect(c, x, 0, 4, 40, '#4a3424');
     paintTerrain(c, 0, 480, () => 228, MAT.planks);
     rect(c, 0, 224, 480, 4, '#4a3020'); rect(c, 0, 224, 480, 1, '#6a4a30');
+    // a crossbeam under the roof, with a little model of the Wren hanging from it
+    rect(c, 0, 118, 480, 5, '#4a3424'); rect(c, 0, 118, 480, 1, '#6a4c34'); rect(c, 0, 122, 480, 1, '#2a1e14');
+    line(c, 160, 123, 160, 146, '#c8c0b0');
+    for (let i = 0; i < 18; i++) { const u = (i - 9) / 9; rect(c, 151 + i, 152 - Math.round(u * u * 2), 1, 4 - Math.round(Math.abs(u) * 2), i % 3 ? '#4a6a8a' : '#3a5a7a'); }
+    rect(c, 160, 138, 1, 12, '#5a3c22');
+    for (let y = 140; y < 149; y++) rect(c, 160 - Math.round((y - 140) * 0.8), y, Math.round((y - 140) * 0.8), 1, '#c8604a');
+    for (const hx of [330, 342, 354]) { line(c, hx, 123, hx, 130, '#8a7a5a'); rect(c, hx - 2, 130, 5, 6, hx === 342 ? '#7a8a4a' : '#8a9a5a'); }
     // the window with the red curtain, looking out over the bay
-    c.clearRect(222, 120, 36, 30);
-    rect(c, 219, 117, 42, 3, '#3a2616'); rect(c, 218, 150, 44, 3, '#c8b898');
-    rect(c, 219, 117, 3, 36, '#3a2616'); rect(c, 258, 117, 3, 36, '#3a2616'); rect(c, 239, 120, 2, 30, '#3a2616');
-    for (let j = 0; j < 40; j++) { const sw = 7 - (j > 26 ? (j - 26) / 3 : 0); rect(c, 212, 114 + j, sw, 1, j % 3 ? '#b83a2a' : '#8a2a20'); rect(c, 268 - sw, 114 + j, sw, 1, j % 3 ? '#b83a2a' : '#8a2a20'); }
-    rect(c, 208, 112, 64, 2, '#2a1a10');
+    c.clearRect(222, 178, 36, 28);
+    rect(c, 219, 175, 42, 3, '#3a2616'); rect(c, 218, 206, 44, 3, '#c8b898');
+    rect(c, 219, 175, 3, 34, '#3a2616'); rect(c, 258, 175, 3, 34, '#3a2616'); rect(c, 239, 178, 2, 28, '#3a2616');
+    for (let j = 0; j < 38; j++) { const sw = 7 - (j > 24 ? (j - 24) / 3 : 0); rect(c, 212, 172 + j, sw, 1, j % 3 ? '#b83a2a' : '#8a2a20'); rect(c, 268 - sw, 172 + j, sw, 1, j % 3 ? '#b83a2a' : '#8a2a20'); }
+    rect(c, 208, 170, 64, 2, '#2a1a10');
     // Maggie's bed with a patchwork quilt
-    rect(c, 46, 196, 4, 32, '#4a2a16'); rect(c, 110, 204, 4, 24, '#4a2a16');
-    rect(c, 50, 214, 60, 8, '#6a3e22');
-    for (let i = 0; i < 56; i += 6) for (let j = 0; j < 6; j += 3) rect(c, 52 + i, 208 + j, 6, 3, ['#c84a3a', '#e8d8b0', '#3a6a9a', '#7aa84a'][(i / 6 + j / 3) % 4]);
-    rect(c, 50, 205, 12, 5, '#ece4d4');
+    rect(c, 46, 204, 4, 24, '#4a2a16'); rect(c, 110, 212, 4, 16, '#4a2a16');
+    rect(c, 50, 220, 60, 5, '#6a3e22');
+    for (let i = 0; i < 56; i += 6) for (let j = 0; j < 6; j += 3) rect(c, 52 + i, 214 + j, 6, 3, ['#c84a3a', '#e8d8b0', '#3a6a9a', '#7aa84a'][(i / 6 + j / 3) % 4]);
+    rect(c, 50, 211, 12, 4, '#ece4d4');
     // desk with a lamp and books
-    rect(c, 130, 200, 54, 3, '#7a5232'); rect(c, 132, 203, 3, 25, '#5a3a20'); rect(c, 178, 203, 3, 25, '#5a3a20');
-    rect(c, 140, 194, 16, 6, '#3a5a3a'); rect(c, 140, 194, 16, 1, '#5a7a5a'); px(c, 150, 196, '#e8e0d0');
-    rect(c, 166, 186, 2, 14, '#4a4a50'); rect(c, 161, 182, 12, 5, '#3a6a4a');
+    rect(c, 130, 212, 54, 3, '#7a5232'); rect(c, 132, 215, 3, 13, '#5a3a20'); rect(c, 178, 215, 3, 13, '#5a3a20');
+    rect(c, 140, 207, 16, 5, '#3a5a3a'); rect(c, 140, 207, 16, 1, '#5a7a5a'); px(c, 150, 209, '#e8e0d0');
+    rect(c, 166, 202, 2, 10, '#4a4a50'); rect(c, 161, 198, 12, 5, '#3a6a4a');
     // shelf: books, a carved whale, a jar of shells
-    rect(c, 300, 168, 70, 2, '#5a3a20');
-    [[302, '#8a3a2a'], [306, '#3a5a8a'], [310, '#c8a040'], [314, '#4a6a3a'], [318, '#6a4a6a']].forEach(([x, col]) => rect(c, x, 158, 3, 10, col));
-    rect(c, 330, 162, 14, 5, '#7a6a5a'); rect(c, 342, 161, 3, 2, '#7a6a5a'); px(c, 333, 163, '#2a2a2a');
-    rect(c, 354, 158, 8, 10, '#a8c8d0'); rect(c, 355, 163, 6, 4, '#e8c8b8');
+    rect(c, 300, 192, 70, 2, '#5a3a20');
+    [[302, '#8a3a2a'], [306, '#3a5a8a'], [310, '#c8a040'], [314, '#4a6a3a'], [318, '#6a4a6a']].forEach(([x, col]) => rect(c, x, 183, 3, 9, col));
+    rect(c, 330, 187, 14, 5, '#7a6a5a'); rect(c, 342, 186, 3, 2, '#7a6a5a'); px(c, 333, 188, '#2a2a2a');
+    rect(c, 354, 184, 8, 8, '#a8c8d0'); rect(c, 355, 188, 6, 3, '#e8c8b8');
     // Toby's crayon drawing pinned to the wall
-    rect(c, 384, 150, 26, 20, '#f4f0e4');
-    for (let i = 0; i < 16; i++) px(c, 389 + i, 164 + Math.round(Math.sin(i * 0.5)), '#3a6ac8');
-    rect(c, 392, 158, 10, 3, '#8a5a3a'); line(c, 397, 152, 397, 158, '#5a3a2a'); rect(c, 398, 152, 4, 5, '#d83a2a');
-    px(c, 394, 156, '#e8a040'); px(c, 400, 155, '#e8a040');
-    px(c, 397, 150, '#c8a040');
+    rect(c, 384, 174, 26, 20, '#f4f0e4');
+    for (let i = 0; i < 16; i++) px(c, 389 + i, 188 + Math.round(Math.sin(i * 0.5)), '#3a6ac8');
+    rect(c, 392, 182, 10, 3, '#8a5a3a'); line(c, 397, 176, 397, 182, '#5a3a2a'); rect(c, 398, 176, 4, 5, '#d83a2a');
+    px(c, 394, 180, '#e8a040'); px(c, 400, 179, '#e8a040');
+    px(c, 397, 174, '#c8a040');
     // dresser with the photograph
-    rect(c, 420, 196, 34, 32, '#6a4428'); rect(c, 418, 194, 38, 3, '#5a3a20');
-    rect(c, 423, 202, 28, 8, '#7a5232'); rect(c, 423, 214, 28, 8, '#7a5232');
-    rect(c, 430, 184, 12, 10, '#c8a040'); rect(c, 431, 185, 10, 8, '#d8cdb8'); rect(c, 432, 187, 2, 5, '#4a4a4a'); rect(c, 435, 188, 2, 4, '#6a5a5a'); rect(c, 438, 190, 2, 2, '#6a5a5a');
+    rect(c, 420, 210, 34, 18, '#6a4428'); rect(c, 418, 208, 38, 3, '#5a3a20');
+    rect(c, 423, 213, 28, 5, '#7a5232'); rect(c, 423, 220, 28, 5, '#7a5232');
+    rect(c, 430, 198, 12, 10, '#c8a040'); rect(c, 431, 199, 10, 8, '#d8cdb8'); rect(c, 432, 201, 2, 5, '#4a4a4a'); rect(c, 435, 202, 2, 4, '#6a5a5a'); rect(c, 438, 204, 2, 2, '#6a5a5a');
     // little door to the stairs
     rect(c, 6, 190, 22, 38, '#3a2616'); for (let j = 0; j < 36; j++) rect(c, 8, 192 + j, 18, 1, j % 6 === 5 ? '#4a3018' : '#6a4426');
     rect(c, 22, 210, 2, 2, '#d8b860');
@@ -793,16 +800,18 @@ const HARTLEY = {
     for (let i = 0; i < 80; i++) for (let j = 0; j < 3; j++) px(c, 200 + i, 225 + j, (i + j) % 6 < 3 ? '#8a3a2a' : '#c8a060');
   },
   drawBack(w, sc, cam, t) {
-    Sea.draw(w, 136, 152, cam * 0.1, t, 'arctic', S.time);
-    for (let i = 0; i < 18; i++) rect(w, 226 + i, 136 - Math.round(Math.sin(i / 18 * Math.PI) * 5), 1, 5, '#4a5a4a');
+    Sea.draw(w, 194, 208, cam * 0.1, t, 'arctic', S.time);
+    for (let i = 0; i < 18; i++) rect(w, 226 + i, 194 - Math.round(Math.sin(i / 18 * Math.PI) * 5), 1, 5, '#4a5a4a');
   },
-  lights(sc, cam, t, nf) { return [{ x: 240, y: 134, r: 60, col: '#fff0d0', a: 0.3, always: true }]; },
-  npcs: [{ id: 'ansel', x: 246, left: true, facePlayer: false, when: () => flag('anselCrew') }],
+  lights(sc, cam, t, nf) { return [{ x: 240, y: 192, r: 60, col: '#fff0d0', a: 0.3, always: true }]; },
+  npcs: [{ id: 'ansel', x: 280, left: true, facePlayer: false, when: () => flag('anselCrew') }],
   objects: [
     { x: 17, r: 12, label: 'Go back downstairs', act: () => { Sound.sfx('door'); Game.goto('c3_cannery', { x: 880, facing: -1 }); } },
     { x: 80, r: 24, label: "Maggie's bed", act: () => Dlg.narrate('A narrow bed under a patchwork quilt, red and blue and green. Tucked under the pillow: a very old, very flat, very small toy seal.') },
     { x: 156, r: 18, label: () => Inv.has('sketchbook') ? 'The desk' : 'A green book on the desk', act: () => c3Desk() },
-    { x: 246, r: 10, label: 'Talk to Grandpa', when: () => flag('anselCrew'), act: () => c3AnselAt('attic') },
+    { x: 280, r: 10, label: 'Talk to Grandpa', when: () => flag('anselCrew'), act: () => c3AnselAt('attic') },
+    { x: 240, r: 12, label: 'Look out of the window', act: () => Dlg.narrate('The whole bay of Hookness, the cannery chimney, and far out, the Puffin Stacks. She could see the whales coming from up here.') },
+    { x: 160, r: 8, label: 'A model boat', act: () => Dlg.narrate('A little wooden model of a boat with a red paper sail, hanging from the beam on a thread. Somebody has painted WREN on the side, very small.') },
     { x: 334, r: 30, label: 'The bookshelf', act: () => Dlg.narrate('"Birds of the North." "Knots for Sailors." "How to Build a Small Boat." Between the books, a little wooden whale, carved with a penknife, and a jar of shells.') },
     { x: 397, r: 12, label: 'A drawing on the wall', act: () => c3Crayon() },
     { x: 436, r: 14, label: () => Inv.has('famphoto') ? 'The dresser' : 'A photograph on the dresser', act: () => c3FamPhoto() },
