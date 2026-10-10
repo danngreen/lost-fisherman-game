@@ -307,6 +307,7 @@ const Sound = {
     };
     switch (name) {
       case 'blip': osc('square', 660, 0, 0.05, 0.05); break;
+      case 'peep': osc('triangle', 2300, 2900, 0.06, 0.04); osc('triangle', 2500, 3100, 0.06, 0.04, 0.1); break;
       case 'select': osc('square', 520, 0, 0.05, 0.05); osc('square', 780, 0, 0.07, 0.05, 0.05); break;
       case 'back': osc('square', 400, 260, 0.08, 0.05); break;
       case 'type': osc('square', 900 + Math.random() * 200, 0, 0.015, 0.012); break;

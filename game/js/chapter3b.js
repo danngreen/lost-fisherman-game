@@ -23,6 +23,8 @@ const LETTERS3 = [
 
 // ---------------- objectives for the second half ----------------
 function c3LateObjectives(o) {
+  if (pflActive()) o.unshift('Find the lost pufflings and launch them out to sea (' + pflSaved().length + '/' + PUFFLINGS.length + ').');
+  else if (flag('pflAsk') && !flag('pflDone')) o.push('Help Ylva on puffling night, at the Puffin Stacks after dark.');
   if (!flag('skerriesChart')) return;
   if (flag('tobyMet') && !flag('tobyCoffee')) {
     if (!flag('ingridToby')) o.push('Ask around the Skerries about the grumpy man at Ness End.');
@@ -93,6 +95,8 @@ async function c3NellLate() {
 }
 
 async function c3YlvaLate() {
+  if (!flag('pflDone') && !pflActive()) { await c3PflAsk(Game.scenes.c3_puffin); return true; }
+  if (pflActive()) { await Dlg.say('ylva', ["Listen for the peeping! They hide in the funniest places.", "Three to a box, then off the cliff they go. Gently!"][(S.f.ylvaP = (S.f.ylvaP || 0) + 1) % 2]); return true; }
   if (flag('tobyStory')) {
     await Dlg.say('ylva', flag('tobyArrived') ? "I saw the Wren go past with THREE people in her! And a goat on the bow! I nearly dropped my telescope!" : "Maggie's little brother, living out at Ness End all this time? With a GOAT? This is the best summer ever.");
     return true;
@@ -610,9 +614,152 @@ function c3RegattaMid(w, sc, cam, t) {
   drawGoat(w, gx - cam, 222, t, Math.cos(t * 0.25) < 0, Math.sin(t * 0.25) > 0.7);
 }
 
+// ---------------- puffling night (side quest at the Puffin Stacks) ----------------
+// After dark the young puffins leave their burrows for the sea, but they fly
+// toward the brightest light they can see and land in all the wrong places.
+// Find them, carry them three at a time, and launch them off the cliff.
+const PUFFLINGS = [
+  { x: 128, where: 'between the rocks by the jetty' },
+  { x: 186, where: 'on the steps' },
+  { x: 248, y: 137, where: "on Ylva's roof" },
+  { x: 352, where: 'under the telescope' },
+  { x: 404, where: 'in a crack in the rock' },
+  { x: 455, where: 'in the wrong burrow' },
+  { x: 520, where: 'in a clump of sea pinks' },
+  { x: 572, where: 'behind a stone' },
+];
+const PFL_BOX = 3, PFL_EDGE = 600;
+const pflActive = () => flag('pflActive') && !flag('pflDone');
+const pflSaved = () => S.f.pflSaved || [];
+
+function drawPuffling(c, x, y, t, i, flap) {
+  const f = flap && Math.floor(t * 10 + i) % 2;
+  const img = sprite(['.ggg.', 'gwwkg', 'gwwgo', (f ? 'G' : '.') + 'ggg' + (f ? 'G' : '.'), '.ggg.', '.o.o.'], { g: '#5a5a60', G: '#4a4a50', w: '#e8e4dc', k: '#141418', o: '#3a3a40' });
+  c.drawImage(img, Math.round(x - 2), Math.round(y - 6));
+}
+
+async function c3PflAsk(sc) {
+  if (!flag('pflAsk')) {
+    setFlag('pflAsk');
+    await Dlg.say('ylva', "It's fledging week! Every night the pufflings creep out of their burrows and flutter down to the sea, all on their own, for the very first time.");
+    await Dlg.say('ylva', "But they fly towards the brightest light they can see. They think it's the moon on the sea. Last night half of them landed on my roof, and one landed in my porridge.");
+    await Dlg.say('ylva', "So every night I go round with a box, pick up the lost ones, and launch them off the cliff out to sea. Will you help me? It's the best job in the world.");
+  }
+  if (nightFactor(S.time) < 0.5) {
+    const r = await Dlg.ask('ylva', "They only come out after dark. Stay for supper and wait?", ['Wait for dark', 'Not tonight']);
+    if (r !== 0) return;
+    await Game.fadeTo(1, 0.7);
+    S.time = 22.5;
+    await wait(0.5);
+    await Game.fadeTo(0, 0.7);
+    await Dlg.narrate('Supper is fish soup and very strong tea. Then the light fades to a deep summer blue, and from all over the island comes a tiny, anxious peeping.');
+  }
+  setFlag('pflActive');
+  sc.pf = { carry: [], launches: [], peepT: 0 };
+  await Dlg.say('ylva', "Here's a box. It holds three pufflings. Carry them to the edge of the cliff, at the far end of the island, and give them a gentle toss out over the water. They'll do the rest.");
+  await Dlg.say('ylva', "I've put my lamp out so no more fly at the window. Take this lantern, and listen for the peeping!");
+  if (flag('anselCrew')) await Dlg.say('ansel', "Puffin rescue! Your grandmother would have been first off the boat.");
+}
+
+async function c3PflPick(sc, i) {
+  const p = sc.pf;
+  if (p.carry.length >= PFL_BOX) { await Dlg.narrate('Your box is full! Take these three to the cliff edge first.'); return; }
+  p.carry.push(i);
+  Sound.sfx('peep');
+  const lines = ['A fluffy grey puffling, ' + PUFFLINGS[i].where + '. It glares at you, then lets you pick it up.', 'You scoop up the puffling ' + PUFFLINGS[i].where + '. It is mostly fluff and indignation.', 'Found one ' + PUFFLINGS[i].where + '! It goes into the box with a small offended peep.'];
+  Toast.show('Puffling in the box (' + p.carry.length + '/' + PFL_BOX + ')', 'feather');
+  if (!S.f.pflTip) { S.f.pflTip = 1; await Dlg.narrate(lines[i % lines.length]); }
+}
+
+async function c3PflLaunch(sc) {
+  const p = sc.pf;
+  sc.player.x = PFL_EDGE; sc.player.facing = 1;
+  for (const i of p.carry) {
+    S.f.pflSaved = pflSaved().concat([i]);
+    p.launches.push({ i, t0: Game.t + p.launches.length * 0 });
+    Sound.sfx('whoosh');
+    await wait(0.6);
+  }
+  const n = p.carry.length;
+  p.carry = [];
+  if (!S.f.pflLaunchTip) {
+    S.f.pflLaunchTip = 1;
+    await Dlg.narrate('You hold the box over the edge and tip it gently. The pufflings tumble out, whirr their stubby wings like mad, and flop down onto the dark water, one, two' + (n > 2 ? ', three.' : '.'));
+    await Dlg.narrate('They bob up, shake their heads, and paddle away out to sea without a single look back.');
+  }
+  if (pflSaved().length >= PUFFLINGS.length) await c3PflDone(sc);
+}
+
+async function c3PflDone(sc) {
+  await wait(1.5);
+  setFlag('pflDone'); S.f.pflActive = 0;
+  await Dlg.say('ylva', "That's ALL of them! Eight pufflings, out to sea, safe and sound! Oh, you were brilliant. Even the one on the roof!");
+  await Dlg.say('ylva', "I want you to have something. It was my grandmother Sigrid's. Her puffin counting book. Fifty years of counts.");
+  await Dlg.narrate('A battered red notebook, every page full of numbers. Near the back, in a different hand, neat and small:');
+  await Dlg.narrate('"3,002 puffins. Counted by M. Hartley, aged 12. (Toby counted 11. They were all called Kevin.)"');
+  Inv.add('countbook'); Sound.sfx('quest');
+  Inv.addCoins(20);
+  if (flag('anselCrew')) await Dlg.say('ansel', "Her handwriting. At twelve years old. ...Every time I think I've found the last bit of her, there's another one.");
+  sc.pf = null;
+}
+
+function c3PflDraw(w, sc, cam, t) {
+  if (!pflActive() || !sc.pf) return;
+  const saved = pflSaved(), p = sc.pf;
+  PUFFLINGS.forEach((pf, i) => {
+    if (saved.includes(i) || p.carry.includes(i)) return;
+    const near = Math.abs(sc.player.x - pf.x) < 40;
+    drawPuffling(w, pf.x - cam + Math.sin(t * 1.3 + i) * 1, pf.y || sc.ground(pf.x), t, i, near);
+  });
+}
+
+function c3PflFront(w, sc, cam, t) {
+  if (!sc.pf) return;
+  for (const L of sc.pf.launches) {
+    const u = (Game.t - L.t0) / 3;
+    if (u > 1) continue;
+    let x, y;
+    // a whirring flutter out and down to the water, then a paddle off out to sea
+    const gy = sc.ground(PFL_EDGE) - 14;
+    if (u < 0.3) { const k = u / 0.3; x = PFL_EDGE + 6 + k * 16; y = gy - Math.sin(k * Math.PI) * 10 + k * (246 - gy); }
+    else { const k = (u - 0.3) / 0.7; x = PFL_EDGE + 22 + k * 40; y = 246 + Math.sin(t * 4 + L.i) * 0.5; }
+    drawPuffling(w, x - cam, y, t, L.i, u < 0.3);
+  }
+}
+
+// their pale little faces catch the starlight, so you can just make them out in the dark
+function c3PflGlint(c, sc, cam, t) {
+  if (!sc.pf) return;
+  const saved = pflSaved();
+  PUFFLINGS.forEach((pf, i) => {
+    if (saved.includes(i) || sc.pf.carry.includes(i)) return;
+    c.globalAlpha = 0.35 + 0.25 * Math.sin(t * 2 + i * 1.7);
+    rect(c, Math.round(pf.x - cam + Math.sin(t * 1.3 + i)), (pf.y || sc.ground(pf.x)) - 5, 2, 1, '#f4f0e4');
+    c.globalAlpha = 1;
+  });
+}
+
+function c3PflOverlay(c, sc) {
+  if (!pflActive() || !sc.pf || Game.hudHidden) return;
+  const s = 'Pufflings saved: ' + pflSaved().length + ' / ' + PUFFLINGS.length + '     In your box: ' + sc.pf.carry.length + ' / ' + PFL_BOX;
+  c.globalAlpha = 0.85; rect(c, W / 2 - 110, H - 20, 220, 14, '#0e1220'); c.globalAlpha = 1;
+  drawText(c, s, W / 2, H - 17, '#fff6dc', { align: 'center' });
+}
+
+function c3PflUpdate(sc, dt) {
+  if (!pflActive()) return;
+  if (!sc.pf) sc.pf = { carry: [], launches: [], peepT: 0 };
+  // lost pufflings peep when you're close
+  sc.pf.peepT -= dt;
+  const saved = pflSaved();
+  const near = PUFFLINGS.some((pf, i) => !saved.includes(i) && !sc.pf.carry.includes(i) && Math.abs(sc.player.x - pf.x) < 50);
+  if (near && sc.pf.peepT <= 0) { Sound.sfx('peep'); sc.pf.peepT = 1.2 + Math.random(); }
+}
+
 // ---------------- epilogue ----------------
 const EPILOGUE3 = {
-  cards: [
+  get cards() { return flag('pflDone') ? this.cardList.slice(0, 2).concat([PFL_CARD], this.cardList.slice(2)) : this.cardList; },
+  cardList: [
     'Toby stayed in Saltmere all summer. On his first day, Admiral ate Greta\'s hat. On his second day, he ate her other hat.',
     'In the autumn, Bo helped Toby finish his boat at last. Fifty years in the building, and she floats like a duck. He named her Maggie.',
     'The Wren sails out of Saltmere harbour most evenings now, under her red sail. Sometimes Grandpa is at the tiller, and sometimes Toby is, and they argue about it the whole way out and the whole way back.',
@@ -630,8 +777,42 @@ const EPILOGUE3 = {
   final: ['Thank you for playing', 'Chapter III: The Red Sail', '', 'Maggie came home.'],
 };
 
+const PFL_CARD = "Up at the Puffin Stacks, Ylva's count that summer came to four thousand, two hundred and thirty-one puffins, and eight pufflings who went to sea in a cardboard box. She called every one of them Kevin.";
+
 // ---------------- registration ----------------
+// puffling night at the Puffin Stacks: hooks into the summer Puffin Stacks scene
+function registerPufflings() {
+  const P = C3_PUFFIN;
+  const dm = P.drawMid, df = P.drawFront, ov = P.overlay, li = P.lights;
+  // during the rescue the grown-ups are tucked up in their burrows, so only the lost pufflings are out
+  P.drawMid = function (w, sc, cam, t) {
+    if (pflActive()) drawBoat(w, boatCfg(), 42 - cam, 239, t, {});
+    else dm.call(this, w, sc, cam, t);
+    c3PflDraw(w, sc, cam, t);
+  };
+  P.drawFront = function (w, sc, cam, t) { df.call(this, w, sc, cam, t); c3PflFront(w, sc, cam, t); };
+  P.overlay = function (c, sc, cam, t, nf) { ov.call(this, c, sc, cam, t, nf); c3PflOverlay(c, sc); };
+  P.lights = function (sc, cam, t, nf) {
+    const L = li.call(this, sc, cam, t, nf).filter(() => !pflActive());
+    if (pflActive()) L.push({ x: sc.player.x - cam + 6, y: sc.ground(sc.player.x) - 16, r: 46, col: '#ffcf7a', a: 0.55, flicker: true, always: true });
+    return L;
+  };
+  P.update = (sc, dt) => c3PflUpdate(sc, dt);
+  const em = P.emissive;
+  P.emissive = function (c, sc, cam, t, nf) { if (!pflActive()) em.call(this, c, sc, cam, t, nf); else c3PflGlint(c, sc, cam, t); };
+  const fish = P.objects.find(o => o.label === 'Fish');
+  fish.when = () => !pflActive();
+  P.objects.push(
+    ...PUFFLINGS.map((pf, i) => ({ x: pf.x, r: 8, label: 'Pick up the puffling', when: () => pflActive() && !pflSaved().includes(i) && !(Game.scenes.c3_puffin.pf && Game.scenes.c3_puffin.pf.carry.includes(i)), act: sc => c3PflPick(sc, i) })),
+    { x: PFL_EDGE, r: 10, label: 'Launch the pufflings out to sea', when: () => pflActive() && Game.scenes.c3_puffin.pf && Game.scenes.c3_puffin.pf.carry.length > 0, act: sc => c3PflLaunch(sc) },
+  );
+  // if you sail away mid-rescue, the pufflings in your box go back where you found them
+  const en = P.onEnter;
+  P.onEnter = async function (sc, p) { if (sc.pf) sc.pf.carry = []; await en.call(this, sc, p); };
+}
+
 function registerChapter3b() {
+  registerPufflings();
   EPILOGUES[3] = EPILOGUE3;
   // the race: rivals, the finish line, and what happens when you cross it
   const vs = CHAPTERS[3].voyageStyle;

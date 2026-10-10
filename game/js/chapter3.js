@@ -673,7 +673,7 @@ async function c3Ylva() {
     'Four thousand, two hundred and thirty-one puffins! And this year, so many pufflings. Look at them. Little grey pom-poms with beaks.',
     flag('wrenHome') ? 'You got the Wren home! I watched you go past with her on the tow line. I waved so hard I nearly fell off the rock.' : 'The Glass Floe is two legs of food north of here. The ice is almost all gone now. Just slush, and the Wren.',
   ];
-  await Dlg.say('ylva', lines[(S.f.ylva3 = (S.f.ylva3 || 0) + 1) % lines.length]);
+  await Dlg.say('ylva', lines[(S.f.ylva3n = (S.f.ylva3n || 0) + 1) % lines.length]);
 }
 
 // ---------------- Hookness in summer ----------------

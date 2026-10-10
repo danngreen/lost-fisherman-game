@@ -201,6 +201,7 @@ function initChapter3Art() {
     efeather: ['......kk', '.....kSk', '....kSSk', '...kSSk.', '..kSSk..', '.kSkk...', 'k.......', '........'],
     smoked: ['........', '..kkkk..', '.kooook.', 'koBoooBk', 'kooooook', '.kBBBBk.', '..kkkk..', '........'],
     cup: ['kk....kk', 'ksk..ksk', '.kssssk.', '.ksssSk.', '..kssk..', '...kk...', '..kSSk..', '.kkkkkk.'],
+    countbook: ['.kkkkkk.', 'kRrrrrrk', 'kRrwwrrk', 'kRrwkwrk', 'kRrwwrrk', 'kRrrrrrk', 'kRrrrrrk', '.kkkkkk.'],
     paint: ['..kk....', '..kk....', '.kkkk...', 'krrrrk..', 'krrrrk..', 'kRRRRk..', '.kkkk...', '........'],
   };
   for (const k in defs) ICONS[k] = sprite(defs[k], P);

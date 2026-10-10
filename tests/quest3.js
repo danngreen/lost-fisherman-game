@@ -51,6 +51,16 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     await step('ylva skerries', () => c3Ylva());
     log.push('  known seal? ' + locKnown('seal') + ' | route puffin->seal (pip): ' + routeBlock('puffin', 'seal'));
     await step('ylva sigrid', () => c3Ylva());
+    // puffling night
+    window.__pick = 0;
+    await step('ylva pufflings', () => c3Ylva());
+    log.push('  time=' + S.time + ' active=' + flag('pflActive'));
+    const psc = Game.scenes.c3_puffin;
+    for (let i = 0; i < 8; i++) {
+      await act(C3_PUFFIN, 'Pick up the puffling');
+      if (psc.pf.carry.length === 3 || i === 7) await act(C3_PUFFIN, 'Launch');
+    }
+    log.push('pufflings'.padEnd(24) + ' $' + S.coins + ' saved=' + JSON.stringify(S.f.pflSaved) + ' done=' + flag('pflDone') + ' book=' + Inv.has('countbook') + ' | ' + objectives().join(' / '));
     S.inv.bread = 6;
     await step('floe wren', () => act(C3_FLOE, 'The Wren'));
     log.push('  food left: ' + Inv.food());
@@ -100,6 +110,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     log.push('  rivals: ' + st.rivals.map(r => r.name).join(','));
     window.__pick = 1;
     await step('race end (2nd)', () => C3_VILLAGE.onEnter(Game.scenes.c3_village, { raceEnd: 2 }));
+    log.push('  epilogue cards: ' + EPILOGUES[3].cards.length);
     log.push('ending: ended=' + flag('ended') + ' place=' + S.f.racePlace + ' scene=' + Game.sceneId + ' stats=' + JSON.stringify(EPILOGUES[3].stats()));
     log.push('items: ' + Object.keys(S.inv).join(','));
     return log.join('\n');
