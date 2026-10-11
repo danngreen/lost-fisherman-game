@@ -232,12 +232,13 @@ class Place {
       let mv = 0;
       if (Input.held('left')) mv -= 1;
       if (Input.held('right')) mv += 1;
+      const run = Input.held('run') ? 1.8 : 1;
       if (mv) {
-        const nx = clamp(p.x + mv * 56 * dt, this.def.minX || 8, this.def.maxX || this.width - 8);
+        const nx = clamp(p.x + mv * 56 * run * dt, this.def.minX || 8, this.def.maxX || this.width - 8);
         p.walking = nx !== p.x;
         p.x = nx; p.facing = mv;
       }
-      if (p.walking) p.anim += dt; else p.anim = 0;
+      if (p.walking) p.anim += dt * run; else p.anim = 0;
       S.px = p.x;
       // interact
       let best = null, bd = 1e9;
@@ -463,7 +464,7 @@ const TitleScene = {
       if (sel) drawText(c, '→', W / 2 - textWidth(it.label) / 2 - 12, y, UIC.hi, { shadow: '#000' });
       drawText(c, it.label, W / 2, y, it.locked ? '#7a8090' : sel ? UIC.hi : '#e8e4d8', { align: 'center', shadow: '#000' });
     });
-    drawText(c, 'Arrow keys + E / Enter', W / 2, H - 12, '#8a94a8', { align: 'center', shadow: '#000' });
+    drawText(c, 'Arrow keys + E / Enter   Shift to run', W / 2, H - 12, '#8a94a8', { align: 'center', shadow: '#000' });
   },
 };
 

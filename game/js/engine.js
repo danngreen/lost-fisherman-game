@@ -178,6 +178,7 @@ const KEYMAP = {
   KeyJ: 'journal',
   KeyM: 'mute',
   KeyF: 'fullscreen',
+  ShiftLeft: 'run', ShiftRight: 'run',
 };
 const Input = {
   down: {}, hit: {}, any: false,
