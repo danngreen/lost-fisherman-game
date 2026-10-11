@@ -295,6 +295,7 @@ class Place {
       this.def.emissive(ectx, this, cam, t, nf);
       actx.clearRect(0, 0, W, H);
       people(actx);
+      if (this.def.occluders) this.def.occluders(actx, this, cam, t);
       ectx.globalCompositeOperation = 'destination-out';
       ectx.drawImage(actC, 0, 0);
       ectx.globalCompositeOperation = 'source-over';

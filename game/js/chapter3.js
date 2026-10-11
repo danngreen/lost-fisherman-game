@@ -277,15 +277,19 @@ const C3_VILLAGE = Object.assign({}, VILLAGE, {
   },
   drawMid(w, sc, cam, t) {
     VILLAGE.drawMid.call(this, w, sc, cam, t);
-    drawBunting(w, 141 - cam, 152, 461 - cam, 152, t, 0);
-    drawBunting(w, 461 - cam, 152, 701 - cam, 152, t, 2);
-    drawBunting(w, 701 - cam, 152, 1001 - cam, 152, t, 4);
+    this.occluders(w, sc, cam, t);
     // the Wren on the trestles at Bo's, or moored at the pier
     if (flag('wrenHome') && !flag('wrenReady')) {
       const b = makeBoat({ type: 'wren', sail: flag('wrenFixed') ? 'white' : 'none', named: flag('wrenNamed') });
       w.drawImage(b.c, Math.round(743 - cam - b.c.width / 2), 207 - b.wl - 2);
     }
     if (flag('tobyArrived') && typeof c3RegattaMid === 'function') c3RegattaMid(w, sc, cam, t);
+  },
+  // the bunting hangs in front of the shop windows, so it hides their glow too
+  occluders(w, sc, cam, t) {
+    drawBunting(w, 141 - cam, 152, 461 - cam, 152, t, 0);
+    drawBunting(w, 461 - cam, 152, 701 - cam, 152, t, 2);
+    drawBunting(w, 701 - cam, 152, 1001 - cam, 152, t, 4);
   },
   drawFront(w, sc, cam, t) {
     const px0 = 1036 - cam;

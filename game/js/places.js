@@ -289,7 +289,7 @@ const VILLAGE = {
     drawNet(c, 6, 170, 28, 36);
     drawLobsterPot(c, 14, 222); drawLobsterPot(c, 120, 222); drawBarrel(c, 132, 222);
     // Bakery
-    H_(150, { w: 92, h: 72, wall: '#e8d8b0', wallDark: '#c8b490', trim: '#f4ecd8', roof: '#a04a3a', roofDark: '#7a3228', roofH: 16, door: 66, doorCol: '#6a4a2a', windows: [[10, 26, 30, 18], [62, 12, 10, 8]], chimney: 70, sign: { x: 14, y: 6, text: 'ROSA\'S BAKERY', bg: '#f8f0e0', fg: '#8a3228' }, awning: { x: 2, y: 20, w: 50, a: '#c84a3a', b: '#f4ecd8' }, seed: 5 });
+    H_(150, { w: 92, h: 72, wall: '#e8d8b0', wallDark: '#c8b490', trim: '#f4ecd8', roof: '#a04a3a', roofDark: '#7a3228', roofH: 16, door: 66, doorCol: '#6a4a2a', windows: [[10, 26, 30, 18], [62, 22, 10, 8]], chimney: 70, sign: { x: 14, y: 6, text: 'ROSA\'S BAKERY', bg: '#f8f0e0', fg: '#8a3228' }, awning: { x: 2, y: 20, w: 50, a: '#c84a3a', b: '#f4ecd8' }, seed: 5 });
     // bread in window
     for (let i = 0; i < 4; i++) { ellipse(c, 166 + i * 7, 238 - 22 - 24 + 22, 2, 1, '#c8884a'); }
     // General store
@@ -300,7 +300,7 @@ const VILLAGE = {
     rect(c, 404, 210, 40, 3, '#7a5432'); rect(c, 404, 202, 40, 2, '#6a4428'); rect(c, 406, 213, 3, 9, '#4a3020'); rect(c, 439, 213, 3, 9, '#4a3020'); rect(c, 406, 202, 2, 8, '#4a3020'); rect(c, 440, 202, 2, 8, '#4a3020');
     drawLampPost(c, 392, 222);
     // Fishmonger stall
-    H_(468, { w: 86, h: 66, wall: '#d4dce4', wallDark: '#aab4c0', trim: '#f4f4f4', roof: '#3a5a8a', roofDark: '#28406a', roofH: 12, windows: [[60, 10, 14, 10]], sign: { x: 6, y: 4, text: 'TAM\'S FISH', bg: '#2a4a7a', fg: '#ffffff' }, awning: { x: -4, y: 18, w: 94, a: '#3a6aa8', b: '#f4f4f4' }, seed: 9 });
+    H_(468, { w: 86, h: 66, wall: '#d4dce4', wallDark: '#aab4c0', trim: '#f4f4f4', roof: '#3a5a8a', roofDark: '#28406a', roofH: 12, windows: [[60, 4, 14, 9]], sign: { x: 6, y: 4, text: 'TAM\'S FISH', bg: '#2a4a7a', fg: '#ffffff' }, awning: { x: -4, y: 18, w: 94, a: '#3a6aa8', b: '#f4f4f4' }, seed: 9 });
     rect(c, 470, 198, 82, 20, '#6a5040'); rect(c, 470, 196, 82, 3, '#8a6a50'); rect(c, 472, 199, 78, 4, '#dfeef4');
     for (let i = 0; i < 9; i++) { const ids = ['herring', 'mackerel', 'cod', 'sardine', 'snapper']; const f = fishSprite(ids[i % 5]); c.drawImage(f, 474 + i * 8, 196 - f.height + 3); }
     for (let i = 0; i < 4; i++) { line(c, 482 + i * 18, 182, 482 + i * 18, 186, '#3a3a3a'); c.drawImage(fishSprite(['cod', 'mackerel', 'herring', 'cod'][i]), 476 + i * 18, 186); }
