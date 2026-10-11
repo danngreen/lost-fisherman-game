@@ -342,6 +342,9 @@ async function c3Ingrid() {
 }
 
 // ---------------- Ness End ----------------
+// the boat shed's doorway: [left, right, height], relative to the shed's left edge
+const SHED_DOOR = [18, 42, 26];
+
 // after the first meeting Toby shuts himself (and Admiral) in the boat shed until the coffee
 const tobyShut = () => flag('tobyMet') && !flag('tobyCoffee');
 
@@ -371,26 +374,33 @@ const NESSEND = {
     // the bench outside the hut
     const bx = 228, bg = this.ground(236);
     rect(c, bx, bg - 8, 22, 2, '#7a5432'); rect(c, bx + 1, bg - 6, 2, 6, '#4a3020'); rect(c, bx + 19, bg - 6, 2, 6, '#4a3020');
-    // the boat shed, with Toby's unfinished boat
+    // the boat shed: plank walls, a dark inside, and Toby's unfinished boat seen through the doorway
     const sx = 400, sg = this.ground(430);
+    for (let i = 2; i < 58; i++) {
+      const top = Math.floor(sg - 40 + Math.abs(i + 2 - 32) * 0.3) + 3, bot = this.ground(sx + i);
+      const door = i >= SHED_DOOR[0] && i < SHED_DOOR[1];
+      rect(c, sx + i, top, 1, bot - top, i % 6 === 0 ? '#4a3424' : '#5e4630');
+      if (door) rect(c, sx + i, sg - SHED_DOOR[2], 1, bot - sg + SHED_DOOR[2], '#241812');
+    }
+    rect(c, sx + SHED_DOOR[0] - 1, sg - SHED_DOOR[2] - 2, SHED_DOOR[1] - SHED_DOOR[0] + 2, 2, '#4a3424');
+    rect(c, sx + SHED_DOOR[0], sg - 4, SHED_DOOR[1] - SHED_DOOR[0], 2, '#6a4a30');
+    for (let i = 0; i < 8; i++) { const rx = sx + 10 + i * 5, rh = 10 - Math.abs(i - 3.5) * 1.6; for (let j = 0; j < rh; j++) { const qx = rx + Math.round(Math.sin(j / rh * 1.6) * 2) - sx; if (qx >= SHED_DOOR[0] && qx < SHED_DOOR[1]) px(c, sx + qx, sg - 6 - j, '#a07a52'); } }
+    rect(c, sx + SHED_DOOR[0], sg - 7, SHED_DOOR[1] - SHED_DOOR[0], 2, '#8a6a42');
     for (let i = 0; i < 64; i++) rect(c, sx - 2 + i, sg - 40 + Math.abs(i - 32) * 0.3, 1, 4, i % 4 === 0 ? '#4a3424' : '#5a4430');
-    rect(c, sx, sg - 36, 2, 36, '#5a4430'); rect(c, sx + 58, sg - 36, 2, 36, '#5a4430');
-    rect(c, sx + 6, sg - 4, 48, 2, '#6a4a30');
-    for (let i = 0; i < 8; i++) { const rx = sx + 10 + i * 5, rh = 10 - Math.abs(i - 3.5) * 1.6; for (let j = 0; j < rh; j++) px(c, rx + Math.round(Math.sin(j / rh * 1.6) * 2), sg - 6 - j, '#a07a52'); }
-    rect(c, sx + 8, sg - 7, 42, 2, '#8a6a42');
+    rect(c, sx, sg - 36, 2, 36, '#4a3424'); rect(c, sx + 58, sg - 36, 2, 36, '#4a3424');
   },
   drawBack(w, sc, cam, t) { skerrySea(w, sc, cam, t, 152); },
   drawMid(w, sc, cam, t) {
     drawBoat(w, boatCfg(), 36 - cam, 239, t, {});
     if (tobyShut()) {
       // the shed doors, shut tight
-      const sx = 400, sg = this.ground(430);
-      for (let i = 0; i < 56; i++) {
-        const top = Math.floor(sg - 40 + Math.abs(i + 4 - 32) * 0.3) + 3, bot = this.ground(sx + 2 + i);
-        rect(w, sx + 2 + i - cam, top, 1, bot - top, i === 27 ? '#2a1c12' : i % 7 === 0 ? '#4a3424' : '#6a4c34');
+      const sx = 400, sg = this.ground(430), [d0, d1, dh] = SHED_DOOR, mid = (d0 + d1) / 2;
+      for (let i = d0; i < d1; i++) {
+        const bot = this.ground(sx + i);
+        rect(w, sx + i - cam, sg - dh, 1, bot - sg + dh, i === mid - 1 ? '#2a1c12' : (i - d0) % 4 === 3 ? '#4a3424' : '#6a4c34');
       }
-      for (const dx of [2, 30]) { rect(w, sx + dx - cam, sg - 28, 28, 2, '#4a3424'); rect(w, sx + dx - cam, sg - 9, 28, 2, '#4a3424'); }
-      rect(w, sx + 24 - cam, sg - 19, 2, 3, '#2a2a2a'); rect(w, sx + 34 - cam, sg - 19, 2, 3, '#2a2a2a');
+      for (const y of [sg - dh + 4, sg - 6]) rect(w, sx + d0 - cam, y, d1 - d0, 2, '#4a3424');
+      rect(w, sx + mid - 4 - cam, sg - dh / 2, 2, 3, '#2a2a2a'); rect(w, sx + mid + 2 - cam, sg - dh / 2, 2, 3, '#2a2a2a');
     }
     if (!flag('tobySouth') && !tobyShut()) {
       const gx = 200 + Math.sin(t * 0.3) * 30;
