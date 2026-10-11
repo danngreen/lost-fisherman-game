@@ -3,6 +3,9 @@
 // Game loop, scene management, rendering pipeline, walkable places
 // ---------------------------------------------------------------------------
 const [worldC, wctx] = makeCanvas(W, H);
+// glowing windows etc. are drawn on their own layer, with the people cut out of it so they stand in front
+const [emC, ectx] = makeCanvas(W, H);
+const [actC, actx] = makeCanvas(W, H);
 
 const Game = {
   scenes: {}, scene: null, sceneId: null,
@@ -266,10 +269,7 @@ class Place {
     const horizon = this.def.horizon || 150;
     Sky.draw(c, h, wea, horizon, t);
     const cam = Math.round(this.cam);
-    composeWorld(c, w => {
-      if (this.def.drawBack) this.def.drawBack(w, this, cam, t);
-      w.drawImage(this.static, cam, 0, W, H, 0, 0, W, H);
-      if (this.def.drawMid) this.def.drawMid(w, this, cam, t);
+    const people = w => {
       for (const n of this.npcList()) {
         const P = PEOPLE[n.p || n.id];
         const nx = n.x - cam;
@@ -281,10 +281,25 @@ class Place {
         const p = this.player;
         drawPerson(w, PEOPLE.player, p.x - cam, this.ground(p.x), { left: p.facing < 0, walking: p.walking, anim: p.anim });
       }
+    };
+    composeWorld(c, w => {
+      if (this.def.drawBack) this.def.drawBack(w, this, cam, t);
+      w.drawImage(this.static, cam, 0, W, H, 0, 0, W, H);
+      if (this.def.drawMid) this.def.drawMid(w, this, cam, t);
+      people(w);
       if (this.def.drawFront) this.def.drawFront(w, this, cam, t);
     }, h, wea, this.def.indoor ? 0.55 : 1);
     const nf = nightFactor(h);
-    if (this.def.emissive) this.def.emissive(c, this, cam, t, nf);
+    if (this.def.emissive) {
+      ectx.clearRect(0, 0, W, H);
+      this.def.emissive(ectx, this, cam, t, nf);
+      actx.clearRect(0, 0, W, H);
+      people(actx);
+      ectx.globalCompositeOperation = 'destination-out';
+      ectx.drawImage(actC, 0, 0);
+      ectx.globalCompositeOperation = 'source-over';
+      c.drawImage(emC, 0, 0);
+    }
     if (this.def.lights) drawLights(c, this.def.lights(this, cam, t, nf), nf);
     if (this.def.overlay) this.def.overlay(c, this, cam, t, nf);
     if (wea === 'storm') Weather.rain(c, t, 1);

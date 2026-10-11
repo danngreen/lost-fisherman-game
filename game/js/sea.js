@@ -87,9 +87,8 @@ const Chart = {
   open(from) {
     return new Promise(res => {
       const ids = Object.keys(locs()).filter(locKnown);
-      const home = chap().home;
-      let sel = ids.indexOf(from === home ? ids.find(i => i !== home) : home);
-      if (sel < 0) sel = 0;
+      let sel = ids.indexOf(from);
+      if (sel < 0) sel = Math.max(0, ids.indexOf(chap().home));
       this.active = { from, ids, sel, res, t: 0 };
       Input.consume('act');
       Sound.sfx('select');
