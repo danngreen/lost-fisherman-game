@@ -342,6 +342,9 @@ async function c3Ingrid() {
 }
 
 // ---------------- Ness End ----------------
+// after the first meeting Toby shuts himself (and Admiral) in the boat shed until the coffee
+const tobyShut = () => flag('tobyMet') && !flag('tobyCoffee');
+
 const NESSEND = {
   id: 'nessend', name: 'Ness End', sub: 'The last rock in the world', width: 560, horizon: 152, spawn: 56, minX: 24, maxX: 520,
   music: () => flag('tobyStory') ? 'wonder' : 'sea', ambience: { sea: 0.8, wind: 0.5 },
@@ -379,7 +382,17 @@ const NESSEND = {
   drawBack(w, sc, cam, t) { skerrySea(w, sc, cam, t, 152); },
   drawMid(w, sc, cam, t) {
     drawBoat(w, boatCfg(), 36 - cam, 239, t, {});
-    if (!flag('tobySouth')) {
+    if (tobyShut()) {
+      // the shed doors, shut tight
+      const sx = 400, sg = this.ground(430);
+      for (let i = 0; i < 56; i++) {
+        const top = Math.floor(sg - 40 + Math.abs(i + 4 - 32) * 0.3) + 3, bot = this.ground(sx + 2 + i);
+        rect(w, sx + 2 + i - cam, top, 1, bot - top, i === 27 ? '#2a1c12' : i % 7 === 0 ? '#4a3424' : '#6a4c34');
+      }
+      for (const dx of [2, 30]) { rect(w, sx + dx - cam, sg - 28, 28, 2, '#4a3424'); rect(w, sx + dx - cam, sg - 9, 28, 2, '#4a3424'); }
+      rect(w, sx + 24 - cam, sg - 19, 2, 3, '#2a2a2a'); rect(w, sx + 34 - cam, sg - 19, 2, 3, '#2a2a2a');
+    }
+    if (!flag('tobySouth') && !tobyShut()) {
       const gx = 200 + Math.sin(t * 0.3) * 30;
       drawGoat(w, gx - cam, this.ground(gx), t, Math.cos(t * 0.3) < 0, Math.sin(t * 0.3) > 0.8);
     }
@@ -393,7 +406,7 @@ const NESSEND = {
   },
   npcs: [
     ...addAnsel([], 92),
-    { id: 'toby', x: 430, when: () => !flag('tobyCoffee') },
+    { id: 'toby', x: 430, when: () => !flag('tobyMet') },
     { id: 'toby', x: 240, sit: true, facePlayer: false, when: () => flag('tobyCoffee') && !flag('tobySouth') },
   ],
   objects: [
@@ -402,7 +415,7 @@ const NESSEND = {
     ...sketchSpots('nessend'),
     { x: 150, r: 14, label: 'The stone hut', act: () => Dlg.narrate(flag('tobyStory') ? 'Through the window: a narrow bed, a stove, a shelf of books about boats, and, pinned to the wall, a crayon drawing of a little boat with a red sail.' : 'A tiny stone hut with one window. A sign on the door says: GO AWAY. Underneath, smaller: THIS MEANS YOU, GOAT.') },
     { x: 300, r: 14, label: 'The fog tower', act: () => Dlg.narrate('The old foghorn station. Its horn has been silent for years. Somebody has planted potatoes in a bathtub at the bottom of the tower.') },
-    { x: 430, r: 14, label: () => flag('tobyCoffee') ? 'The boat shed' : 'Talk to the man', when: () => !flag('tobyCoffee') || flag('tobyStory'), act: () => flag('tobyCoffee') ? c3BoatShed() : c3Toby() },
+    { x: 430, r: 14, label: () => flag('tobyCoffee') ? 'The boat shed' : flag('tobyMet') ? 'Knock on the shed door' : 'Talk to the man', when: () => !flag('tobyCoffee') || flag('tobyStory'), act: () => flag('tobyCoffee') ? c3BoatShed() : c3Toby() },
     { x: 240, r: 12, label: () => flag('tobyStory') ? 'Talk to Toby' : 'Talk to the man', when: () => flag('tobyCoffee') && !flag('tobySouth'), act: () => c3Toby() },
     { x: 500, r: 10, label: 'Fish', act: sc => fishHere(sc, 504, 240, 1) },
   ],
@@ -423,8 +436,7 @@ async function c3BoatShed() {
 
 async function c3Toby() {
   if (!flag('tobyMet')) {
-    setFlag('tobyMet');
-    await Dlg.narrate('A man with a grey beard and a hammer comes stamping out of the boat shed.');
+    await Dlg.narrate('A man with a grey beard puts down his hammer and comes stamping over from the boat shed.');
     await Dlg.say('tobyQ', "Oi! This is a PRIVATE rock! Can't you read? It says GO AWAY. On the door. In capitals.");
     await Dlg.say('tobyQ', 'Admiral! See them off!');
     await Dlg.narrate('The goat trots over, looks at you, and starts eating your sleeve.');
@@ -432,6 +444,7 @@ async function c3Toby() {
     await Dlg.say('ansel', "We're looking for a man called Tobias Hartley. From Hookness.");
     await Dlg.narrate('The man goes very still.');
     await Dlg.say('tobyQ', "Never heard of him. Go away.");
+    setFlag('tobyMet'); Sound.sfx('door');
     await Dlg.narrate('He stamps back into the boat shed and slams the door. A moment later, it creaks open again, so he can pull the goat inside, and slams again.');
     await Dlg.say('ansel', "...That's him, little gull. He has her scowl.");
     Sound.sfx('quest');
@@ -439,12 +452,19 @@ async function c3Toby() {
   }
   if (!flag('tobyCoffee')) {
     if (!Inv.has('coffee')) {
+      Sound.sfx('thud');
+      await Dlg.narrate('You knock on the shed door. Hammering stops. A muffled voice comes from inside.');
       await Dlg.say('tobyQ', ["Still here? GO AWAY.", "I'm busy. I've been busy for fifty years. Go away.", "No, I don't want to buy anything. No, I don't want to talk about boats. GO. AWAY."][(S.f.toby0 = (S.f.toby0 || 0) + 1) % 3]);
+      await Dlg.narrate(['A goat bleats, agreeing with him.', 'The hammering starts again, louder.', 'Something inside the shed is chewing.'][S.f.toby0 % 3]);
       return;
     }
-    Inv.remove('coffee'); setFlag('tobyCoffee');
-    await Dlg.say('tobyQ', "Go a... is that COFFEE?");
-    await Dlg.narrate("He snatches the bag, sniffs it, and closes his eyes like a man hearing his favourite song.");
+    Sound.sfx('thud');
+    await Dlg.narrate('You knock on the shed door.');
+    await Dlg.say('tobyQ', "GO A...");
+    await Dlg.narrate('The door opens a crack. A nose sniffs the air. Then the door flies open.');
+    Inv.remove('coffee'); setFlag('tobyCoffee'); Sound.sfx('door');
+    await Dlg.say('tobyQ', "Is that COFFEE?");
+    await Dlg.narrate("He snatches the bag, sniffs it, and closes his eyes like a man hearing his favourite song. Admiral the goat trots out after him.");
     await Dlg.say('tobyQ', "...Fine. ONE cup. Sit on the bench. Don't touch anything. Don't let the goat eat the bench.");
     await Dlg.narrate('Ten minutes later you are all sitting outside the hut in the sun, holding chipped mugs. The coffee is so strong your eyebrows tingle.');
     await Dlg.say('tobyQ', "So. What do you want?");

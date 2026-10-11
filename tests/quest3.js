@@ -92,7 +92,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     await step('sketch ness end', () => sk(NESSEND));
     await step('toby no coffee', () => c3Toby());
     await step('ingrid toby', () => c3Ingrid());
-    await step('toby coffee', () => act(NESSEND, 'Talk to the man'));
+    await step('toby coffee', () => act(NESSEND, 'Knock on the shed door'));
     await step('toby story', () => act(NESSEND, 'Talk to the man'));
     await step('oskar alive', () => c3Oskar());
     await step('trunk letters', () => act(C3_COTTAGE, 'attic'));
