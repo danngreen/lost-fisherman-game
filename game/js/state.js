@@ -9,7 +9,7 @@ const ITEMS = {
   lure: { name: 'Lucky Lure', type: 'key', desc: 'A shiny red lure. Fish are easier to keep on the line.' },
   hatchet: { name: "Bo's Hatchet", type: 'key', desc: 'Borrowed from Bo the shipwright. Sharp enough for ironwood.' },
   oil: { name: 'Lamp Oil', type: 'key', desc: 'A heavy can of lighthouse oil.' },
-  wick: { name: 'Coconut Wick', type: 'key', desc: 'A thick wick twisted from coconut fibre by Mira.' },
+  wick: { name: 'Coconut Wick', type: 'key', desc: 'A thick wick twisted from coconut fiber by Mira.' },
   cap: { name: "Grandpa's Cap", type: 'key', desc: 'His blue knitted cap. Grandma Margaret made it. It smells of salt and pipe smoke.' },
   lantern: { name: 'Storm Lantern', type: 'key', desc: "Bram's storm lantern. Its light cuts through fog." },
   letter: { name: 'Message in a Bottle', type: 'key', desc: 'Read them in your Journal.' },

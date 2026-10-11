@@ -213,9 +213,9 @@ const COTTAGE = {
     {
       x: 173, r: 14, label: 'Look out the window', act: async () => {
         if (nightFactor(S.time) > 0.6) {
-          await Dlg.narrate('Night has settled over the harbour. Beyond Gull Rock the sea is black...');
+          await Dlg.narrate('Night has settled over the harbor. Beyond Gull Rock the sea is black...');
           await Dlg.narrate('...and for a moment, far out, you think you see a faint green glow under the water. Then it is gone.');
-        } else await Dlg.narrate('The harbour, the pier, and beyond them the grey-blue sea. Gull Rock is a dark smudge on the horizon.');
+        } else await Dlg.narrate('The harbor, the pier, and beyond them the gray-blue sea. Gull Rock is a dark smudge on the horizon.');
       },
     },
     {
@@ -285,7 +285,7 @@ const VILLAGE = {
     const H_ = (x, o) => { const r = drawHouse(c, x, 222, o); sc.wins.push(...r.wins); return r; };
     // Ansel's cottage
     H_(40, { w: 76, h: 64, wall: '#6a8aa0', wallDark: '#4a6680', trim: '#e8e0d0', roof: 'gable', roofCol: '#8a3e2c', roofH: 26, roofDark: '#5a2a1e', door: 30, doorCol: '#8a3a2a', windows: [[8, 22, 12, 12], [52, 22, 12, 12]], chimney: 56, seed: 3 });
-    // set roof colour (drawHouse uses o.roof as colour unless 'gable'); re-shingle gable in red
+    // set roof color (drawHouse uses o.roof as color unless 'gable'); re-shingle gable in red
     drawNet(c, 6, 170, 28, 36);
     drawLobsterPot(c, 14, 222); drawLobsterPot(c, 120, 222); drawBarrel(c, 132, 222);
     // Bakery
@@ -314,16 +314,16 @@ const VILLAGE = {
     const hull = makeBoat({ type: 'sail' });
     rect(c, 722, 206, 4, 16, '#5a4028'); rect(c, 760, 206, 4, 16, '#5a4028'); rect(c, 718, 206, 50, 2, '#6a4a30');
     c.drawImage(hull.c, 0, hull.oy - 2, hull.c.width, hull.c.height - hull.oy + 2, 718, 192, hull.c.width, hull.c.height - hull.oy + 2);
-    // lamp, harbour office
+    // lamp, harbor office
     drawLampPost(c, 780, 222);
-    H_(800, { w: 94, h: 86, wall: '#eeeae2', wallDark: '#c8c4bc', trim: '#b8402e', roof: 'gable', roofCol: '#2e4e72', roofH: 30, roofDark: '#1e3450', door: 42, doorCol: '#1e3450', windows: [[10, 26, 16, 16], [68, 26, 16, 16]], sign: { x: 10, y: 8, text: 'HARBOUR OFFICE', bg: '#1e3450', fg: '#ffffff' }, atticWin: true, seed: 13 });
+    H_(800, { w: 94, h: 86, wall: '#eeeae2', wallDark: '#c8c4bc', trim: '#b8402e', roof: 'gable', roofCol: '#2e4e72', roofH: 30, roofDark: '#1e3450', door: 42, doorCol: '#1e3450', windows: [[10, 26, 16, 16], [68, 26, 16, 16]], sign: { x: 10, y: 8, text: 'HARBOR OFFICE', bg: '#1e3450', fg: '#ffffff' }, atticWin: true, seed: 13 });
     // flag pole
     rect(c, 910, 140, 2, 82, '#d8d8d8'); px(c, 910, 139, '#e8c040'); px(c, 911, 139, '#e8c040');
     // dock clutter
     drawBarrel(c, 935, 222); drawBarrel(c, 946, 222); drawCrate(c, 1004, 222, 10); drawCrate(c, 1008, 212, 8);
     for (let i = 0; i < 4; i++) ellipse(c, 1022, 219 - i * 2, 6 - i, 1, i % 2 ? '#a88a5a' : '#8a6a40');
     drawLampPost(c, 1060, 222);
-    // gable roofs: overpaint in their colours
+    // gable roofs: overpaint in their colors
   },
   drawBack(w, sc, cam, t) {
     if (!sc.clouds) sc.clouds = new CloudLayer(3, 8, 20, 100, 0.1, 'fair', 1600);
@@ -620,7 +620,7 @@ async function talkBo() {
 async function talkGreta() {
   if (!flag('gretaMet')) {
     setFlag('gretaMet');
-    await Dlg.say('greta', "Oh, love. I'm so sorry. We searched for nine days. Every boat in the harbour. We didn't find a thing. Not even an oar.");
+    await Dlg.say('greta', "Oh, love. I'm so sorry. We searched for nine days. Every boat in the harbor. We didn't find a thing. Not even an oar.");
     await Dlg.say('greta', "And you mean to go looking yourself, don't you? I can't stop you. You're a Hale. Hales don't listen.");
     await Dlg.say('greta', 'The last anyone saw of Ansel, he was rowing out toward Gull Rock at dusk. If I were you, that\'s where I\'d start.');
     await Dlg.say('greta', 'And promise me you\'ll be careful. The sea is kind until it isn\'t.');
@@ -641,7 +641,7 @@ async function talkGreta() {
   const lines = [];
   if (!S.boat) lines.push("You'll need a boat first. Bo has an old rowboat he'd let go cheap.");
   if (S.boat === 'big') lines.push("That's a storm sail on your boat! You're braver than half my sailors. Mind the currents round Kettle Point.");
-  lines.push("A tip from an old harbourmaster: it's darker at sea than you think. Head home before nightfall, unless you've a good lantern.");
+  lines.push("A tip from an old harbormaster: it's darker at sea than you think. Head home before nightfall, unless you've a good lantern.");
   lines.push('Watch out for rocks when you sail: steer around them with Up and Down. Every scrape weakens your hull.');
   await Dlg.say('greta', lines[(S.f.greta = (S.f.greta || 0) + 1) % lines.length]);
 }
@@ -664,8 +664,8 @@ async function talkNell() {
   }
   const lines = [
     "Pickles sat on the pier all night last night, staring out to sea. Cats know things.",
-    "Mum says your grandpa is gone. But Mum says lots of things.",
-    "I'm going to be a harbourmaster when I grow up. Or a pirate. Or a harbourmaster for pirates.",
+    "Mom says your grandpa is gone. But Mom says lots of things.",
+    "I'm going to be a harbormaster when I grow up. Or a pirate. Or a harbormaster for pirates.",
   ];
   if (flag('lighthouseLit')) lines.push("I saw the lighthouse blinking last night, all the way out there! Pickles saw it too. She purred.");
   await Dlg.say('nell', lines[(S.f.nell = (S.f.nell || 0) + 1) % lines.length]);
@@ -951,7 +951,7 @@ const COCONUT = {
     {
       x: 962, r: 14, label: 'Look out from the cliff', act: async () => {
         if (flag('lighthouseLit')) await Dlg.narrate('From the clifftop you can see Kettle Point lighthouse to the north-west, its great beam sweeping the sea. Beyond it, a wall of fog sits on the water like a sleeping animal.');
-        else await Dlg.narrate('From the clifftop you can see the old lighthouse at Kettle Point, far to the north-west. It is dark. No light at all. Beyond it, a grey wall of fog sits on the sea.');
+        else await Dlg.narrate('From the clifftop you can see the old lighthouse at Kettle Point, far to the north-west. It is dark. No light at all. Beyond it, a gray wall of fog sits on the sea.');
       },
     },
   ],
@@ -997,15 +997,15 @@ async function talkMira() {
       Inv.remove('pearl'); Inv.remove('honey');
       await Dlg.say('mira', "Oh! Look at it. Look at it shine! And honey... real honey. Rosa's wildflower. You wonderful child.");
       await Dlg.say('mira', "A deal's a deal. Help me carry it down to your boat.");
-      await Dlg.narrate('Together you rig the storm sail on Pip: a great cream-coloured sail with a red band, patched and tough and beautiful. Pip suddenly looks twice her size.');
+      await Dlg.narrate('Together you rig the storm sail on Pip: a great cream-colored sail with a red band, patched and tough and beautiful. Pip suddenly looks twice her size.');
       S.boat = 'big'; setFlag('bigSail'); Sound.sfx('quest');
       await Dlg.say('mira', "There. She'll catch any wind you point her at. Kettle Point is north-west. Go and find him.");
     }
     if (id === 'wick') {
       await Dlg.say('mira', "A wick for Bram's lamp? Old Bram! Is he alright? I always wondered why the light went out...");
-      await Dlg.narrate('Mira pulls a handful of coconut fibre from a basket and twists it between her palms, fast and tight, humming under her breath.');
+      await Dlg.narrate('Mira pulls a handful of coconut fiber from a basket and twists it between her palms, fast and tight, humming under her breath.');
       Inv.add('wick'); Sound.sfx('pickup');
-      await Dlg.say('mira', "There. Coconut fibre burns slow and bright. Tell Bram he still owes me a game of cards.");
+      await Dlg.say('mira', "There. Coconut fiber burns slow and bright. Tell Bram he still owes me a game of cards.");
     }
     if (id === 'ansel') {
       if (flag('lighthouseLit')) await Dlg.say('mira', "Bram's light is burning again. I watched it from the cliff last night and cried like a baby. If Ansel's out there, he'll see it. Now go and bring him home.");
@@ -1270,7 +1270,7 @@ const LAMPROOM = {
           await Dlg.narrate('You need ' + [!Inv.has('oil') ? 'lamp oil' : null, !Inv.has('wick') ? 'a new wick' : null].filter(Boolean).join(' and ') + '.');
           return;
         }
-        await Dlg.narrate("You pour the lamp oil into the reservoir. You fit Mira's coconut-fibre wick into the burner and trim it neat.");
+        await Dlg.narrate("You pour the lamp oil into the reservoir. You fit Mira's coconut-fiber wick into the burner and trim it neat.");
         await Dlg.narrate('Then you strike a match.');
         Inv.remove('oil'); Inv.remove('wick');
         setFlag('lighthouseLit');
@@ -1409,7 +1409,7 @@ const HOLLOW = {
       await wait(0.6);
       await Dlg.narrate('The fog closes around you like a held breath. The waves are quiet here. Too quiet.');
       Sound.whale(0.18);
-      await Dlg.narrate('Somewhere out in the grey, something enormous is breathing. Slow. Patient.');
+      await Dlg.narrate('Somewhere out in the gray, something enormous is breathing. Slow. Patient.');
       await Dlg.narrate('And somewhere on the island, a little way inland, you can smell woodsmoke.');
     }
   },

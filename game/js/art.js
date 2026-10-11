@@ -575,7 +575,7 @@ function makeBoat(cfg) {
   return info;
 }
 
-// Draw a boat with bobbing. cx = horizontal centre, wy = water line y.
+// Draw a boat with bobbing. cx = horizontal center, wy = water line y.
 function drawBoat(c, cfg, cx, wy, t, o) {
   o = o || {};
   const b = makeBoat(cfg);

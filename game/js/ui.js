@@ -23,7 +23,7 @@ const SPEAKERS = {
   you: { name: 'You', p: 'player' },
   ansel: { name: 'Grandpa Ansel', p: 'ansel' },
   anselR: { name: 'Grandpa Ansel', p: 'anselRagged' },
-  greta: { name: 'Greta, Harbourmaster', p: 'greta' },
+  greta: { name: 'Greta, Harbormaster', p: 'greta' },
   bo: { name: 'Bo, Shipwright', p: 'bo' },
   tam: { name: 'Tam, Fishmonger', p: 'tam' },
   rosa: { name: 'Rosa, Baker', p: 'rosa' },

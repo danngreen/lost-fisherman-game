@@ -38,7 +38,7 @@ function drawEider(c, x, gy, t, seed, left) {
   c.drawImage(left ? flipH(img) : img, Math.round(x - 3), Math.round(gy - 6 + bob));
 }
 
-// a big grey seal hauled out on a rock
+// a big gray seal hauled out on a rock
 function drawSeal(c, x, gy, t, seed, left) {
   const head = Math.sin(t * 0.6 + seed) > 0.6 ? 1 : 0;
   const rows = [

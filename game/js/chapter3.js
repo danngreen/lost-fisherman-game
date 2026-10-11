@@ -247,7 +247,7 @@ function anselObject(x, place) { return { x, r: 12, label: 'Talk to Grandpa', wh
 async function c3AnselAt(place) {
   const L = {
     puffin: ["Look at them all, bowing to each other like little waiters. Nell was right.", "Maggie said once she missed the sound of puffins in the morning. I thought she was joking. Rosa did too."],
-    cannery: ["So this is Hookness. Fifty years ago I'd have been chased off this pier with a herring fork.", "She grew up here. In that big grey house. It's so quiet."],
+    cannery: ["So this is Hookness. Fifty years ago I'd have been chased off this pier with a herring fork.", "She grew up here. In that big gray house. It's so quiet."],
     floe: ["This is where I found her. Right about... there. Half frozen, and still scowling.", "It's strange, seeing the floe melted. Like an old friend with a new haircut."],
     lighthouse: ["Bram's light, burning bright. Your doing, that.", "Kettle Point. I came round this headland a thousand times and never knew she'd been here first."],
     attic: ["Her room. Her actual room. I feel like I should take my boots off.", "Look at the view from that window. You can see the whole bay. She'd have watched the whales from up here."],
@@ -299,7 +299,7 @@ const C3_VILLAGE = Object.assign({}, VILLAGE, {
       if (flag('wrenReady')) drawBoat(w, { type: 'wren', sail: flag('redSail') ? 'red' : 'white', named: true }, 1076 - cam, 241, t, { phase: 30 });
       frontWater(w, 240, t, 'north', px0, W, cam);
     }
-    // the whales come into the harbour for the bonfire
+    // the whales come into the harbor for the bonfire
     sc.backs = flag('bonfire') ? drawWhaleBacks(w, 1080 - cam, 258, t, true) : null;
   },
   npcs: [
@@ -342,7 +342,7 @@ const C3_VILLAGE = Object.assign({}, VILLAGE, {
 
 async function c3Opening() {
   Game.hudHidden = true;
-  await Dlg.say('greta', "Ahem. 'By order of the Harbourmaster of Saltmere: Ansel Hale is hereby permitted to go back to sea.'");
+  await Dlg.say('greta', "Ahem. 'By order of the Harbormaster of Saltmere: Ansel Hale is hereby permitted to go back to sea.'");
   await Dlg.say('greta', "'On the condition that he is SUPERVISED.' ...She looks straight at you. 'Very supervised.'");
   await Dlg.say('ansel', "Ha! Did you hear that, little gull? I'm a free man!");
   await Dlg.say('greta', "A SUPERVISED free man. Oh, and this came for you on the post boat. From up north.");
@@ -374,7 +374,7 @@ async function c3TowHome() {
   await wait(0.6);
   setFlag('wrenHome');
   Inv.remove('towline');
-  await Dlg.narrate('Word travels fast. By the time Pip rounds the harbour wall with the Wren bobbing behind her on the tow line, half of Saltmere is out on the pier.');
+  await Dlg.narrate('Word travels fast. By the time Pip rounds the harbor wall with the Wren bobbing behind her on the tow line, half of Saltmere is out on the pier.');
   await Dlg.narrate('Bo and Tam haul the little boat up the slipway and set her on the trestles outside the boatyard. Her paint is gone, her mast is cracked, and her sail is rotten through.');
   await Dlg.say('ansel', "Fifty years in the ice. And she's still in one piece. Just like your grandmother.");
   await Dlg.say('bo', "She's a tough little thing. Hookness-built. Give me a good look at her and I'll tell you what she needs.");
@@ -522,15 +522,15 @@ async function c3Greta() {
   if (typeof c3GretaLate === 'function' && await c3GretaLate()) return;
   const lines = [
     "Supervised, mind. If he so much as LOOKS at a storm, you bring him straight home.",
-    "Midsummer Regatta is on Midsummer Day, as always. Out round Gull Rock and back. I always win. I am the Harbourmaster.",
-    "The Glass Floe melted? In fifty years on this harbour I've never heard the like.",
+    "Midsummer Regatta is on Midsummer Day, as always. Out round Gull Rock and back. I always win. I am the Harbormaster.",
+    "The Glass Floe melted? In fifty years on this harbor I've never heard the like.",
   ];
   await Dlg.say('greta', lines[(S.f.greta3 = (S.f.greta3 || 0) + 1) % lines.length]);
 }
 
 async function c3Nell() {
   if (flag('wrenFixed') && !flag('wrenNamed')) {
-    await Dlg.say('nell', "Is the Wren finished? Can I paint her name? PLEASE? I've been practising my letters on Pickles. ...Not ON Pickles. Near Pickles.");
+    await Dlg.say('nell', "Is the Wren finished? Can I paint her name? PLEASE? I've been practicing my letters on Pickles. ...Not ON Pickles. Near Pickles.");
     const r = await Dlg.ask('nell', 'Let Nell paint the name?', ['Yes, please!', 'Not yet']);
     if (r !== 0) return;
     setFlag('wrenNamed');
@@ -543,7 +543,7 @@ async function c3Nell() {
   if (typeof c3NellLate === 'function' && await c3NellLate()) return;
   const lines = [
     "Are you racing in the Regatta? I'm going to cheer SO loud. Pickles is going to cheer too. Quietly. She's a cat.",
-    flag('wrenHome') ? "The Wren is the prettiest boat in the whole harbour. Don't tell Pip." : "A boat that was frozen in ice for FIFTY years? Like a fish finger!",
+    flag('wrenHome') ? "The Wren is the prettiest boat in the whole harbor. Don't tell Pip." : "A boat that was frozen in ice for FIFTY years? Like a fish finger!",
   ];
   await Dlg.say('nell', lines[(S.f.nell3 = (S.f.nell3 || 0) + 1) % lines.length]);
 }
@@ -625,7 +625,7 @@ const C3_PUFFIN = Object.assign({}, PUFFIN, {
   drawMid(w, sc, cam, t) {
     drawBoat(w, boatCfg(), 42 - cam, 239, t, {});
     for (const [x, l] of PUFFIN_SPOTS) drawPuffin(w, x - cam, this.ground(x), t, x, !!l);
-    // fluffy grey pufflings peeping out of the burrows
+    // fluffy gray pufflings peeping out of the burrows
     for (const bx of [470, 540]) { const gy = this.ground(bx); rect(w, bx - 2 - cam, gy - 3, 4, 3, '#5a5a5e'); px(w, bx - cam, gy - 3, '#e8e4dc'); }
   },
   npcs: addAnsel([{ id: 'ylva', x: 300 }], 110),
@@ -639,7 +639,7 @@ const C3_PUFFIN = Object.assign({}, PUFFIN, {
         : 'Far to the north-west, the rusty roofs of Hookness. To the east, a haze of low rocks and white water, too far to make out.'),
     },
     ...sketchSpots('c3_puffin'),
-    { x: 500, r: 30, label: 'Watch the puffins', act: () => Dlg.narrate('Puffins fly in with beaks full of little silver fish, all lined up neatly like a moustache. A fluffy grey puffling pokes its head out of a burrow and squeaks.') },
+    { x: 500, r: 30, label: 'Watch the puffins', act: () => Dlg.narrate('Puffins fly in with beaks full of little silver fish, all lined up neatly like a mustache. A fluffy gray puffling pokes its head out of a burrow and squeaks.') },
     { x: 604, r: 8, label: 'Fish', act: sc => fishHere(sc, 604, 240, 1) },
   ],
   async onEnter() {
@@ -679,7 +679,7 @@ async function c3Ylva() {
   }
   if (typeof c3YlvaLate === 'function' && await c3YlvaLate()) return;
   const lines = [
-    'Four thousand, two hundred and thirty-one puffins! And this year, so many pufflings. Look at them. Little grey pom-poms with beaks.',
+    'Four thousand, two hundred and thirty-one puffins! And this year, so many pufflings. Look at them. Little gray pom-poms with beaks.',
     flag('wrenHome') ? 'You got the Wren home! I watched you go past with her on the tow line. I waved so hard I nearly fell off the rock.' : 'The Glass Floe is two legs of food north of here. The ice is almost all gone now. Just slush, and the Wren.',
   ];
   await Dlg.say('ylva', lines[(S.f.ylva3n = (S.f.ylva3n || 0) + 1) % lines.length]);
@@ -740,7 +740,7 @@ const C3_CANNERY = Object.assign({}, CANNERY, {
 async function c3HartleyDoor() {
   if (!Inv.has('hkey') && !flag('hartleyIn')) { await Dlg.narrate("The Hartley house. The door is locked, and the windows are boarded up. Oskar must have a key."); return; }
   if (!flag('hartleyIn')) {
-    await Dlg.narrate("Oskar's key turns stiffly in the lock. Inside: dust sheets over the furniture, a stopped clock, and a portrait of a stern man with a stern moustache.");
+    await Dlg.narrate("Oskar's key turns stiffly in the lock. Inside: dust sheets over the furniture, a stopped clock, and a portrait of a stern man with a stern mustache.");
     await Dlg.narrate('At the top of three flights of creaking stairs, a little door with a brass handle.');
   }
   Sound.sfx('door');
@@ -901,7 +901,7 @@ const C3_FLOE = {
     boatObject(40, 'floe'),
     anselObject(100, 'floe'),
     ...sketchSpots('c3_floe'),
-    { x: 270, r: 16, label: 'Watch the seals', act: () => Dlg.narrate('Two big grey seals are hauled out on the ice, snoozing. One of them opens an eye, looks at you, and decides you are not worth waking up for.') },
+    { x: 270, r: 16, label: 'Watch the seals', act: () => Dlg.narrate('Two big gray seals are hauled out on the ice, snoozing. One of them opens an eye, looks at you, and decides you are not worth waking up for.') },
     { x: 426, r: 14, label: () => flag('wrenHome') ? 'The edge of the floe' : 'The Wren', act: sc => c3FloeWren(sc) },
     { x: 400, r: 8, label: 'Fish off the edge', act: sc => fishHere(sc, 396, 240, 1) },
   ],

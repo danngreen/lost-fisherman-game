@@ -212,7 +212,7 @@ function drawWren(c, x, gy, frozen) {
   }
 }
 
-// Whale backs breaking the surface (used in harbours and channels)
+// Whale backs breaking the surface (used in harbors and channels)
 function drawWhaleBacks(c, x, y, t, calfLit) {
   const hump = (cx, w, h, col, top) => {
     for (let i = 0; i < w; i++) {

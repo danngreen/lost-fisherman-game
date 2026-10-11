@@ -246,7 +246,7 @@ const C2_VILLAGE = Object.assign({}, VILLAGE, {
     if (!p.opening) return;
     Game.hudHidden = true;
     await wait(0.8);
-    await Dlg.narrate('Dawn. Half of Saltmere is out on the pier in dressing gowns and slippers, pointing at the harbour.');
+    await Dlg.narrate('Dawn. Half of Saltmere is out on the pier in dressing gowns and slippers, pointing at the harbor.');
     Sound.whale(0.2);
     await Dlg.narrate('There, between the moored boats, two shapes rest in the still water. One is enormous, and glows softly green and blue. The other is small, and completely dark.');
     await Dlg.say('ansel', "She came back, little gull. And look! She's brought her baby.");
@@ -293,7 +293,7 @@ async function c2Rosa() {
     if (items[i].id === 'chat') {
       if (flag('oskarMet')) await Dlg.say('rosa', "Hookness? Margaret came from HOOKNESS? Well. That explains the way she gutted a herring. Fastest hands I ever saw.");
       else if (flag('compassFound')) await Dlg.say('rosa', "Margaret never once talked about where she came from. Only one time, she told me she missed the sound of puffins in the morning. I thought she was joking.");
-      else await Dlg.say('rosa', 'A whale and her baby in the harbour! I sold out of buns by seven o\'clock.');
+      else await Dlg.say('rosa', 'A whale and her baby in the harbor! I sold out of buns by seven o\'clock.');
     }
   }
 }
@@ -355,7 +355,7 @@ async function c2Bo() {
 
 async function c2Greta() {
   const lines = [
-    "A whale AND a calf in my harbour! I've had to close the east moorings. Nobody's complaining, mind. Half the village has been out there since dawn.",
+    "A whale AND a calf in my harbor! I've had to close the east moorings. Nobody's complaining, mind. Half the village has been out there since dawn.",
     'Going north? The sea up there changes its mind about every five minutes. Take plenty of food, and steer clear of the ice.',
     "Your grandfather is driving me mad. 'Just a little sail, Greta.' No. Not until summer.",
   ];
@@ -365,7 +365,7 @@ async function c2Greta() {
 async function c2Nell() {
   if (!flag('nellAsk')) {
     setFlag('nellAsk');
-    await Dlg.say('nell', "Are you going north? Up where the puffins live? Puffins are my favourite bird. They look like tiny waiters.");
+    await Dlg.say('nell', "Are you going north? Up where the puffins live? Puffins are my favorite bird. They look like tiny waiters.");
     await Dlg.say('nell', "If you find a puffin feather, I'll give you fifteen coins! I've been saving again.");
     return;
   }
@@ -405,7 +405,7 @@ const C2_COTTAGE = Object.assign({}, COTTAGE, {
   objects: [
     { x: 49, r: 24, label: 'Sleep', act: () => sleepHere('Your old bed in the corner. Grandpa snores like a foghorn next door.') },
     { x: 100, r: 8, label: 'Look at photo', act: () => Dlg.narrate(flag('oskarMet') ? "Grandma Margaret, laughing on the pier. Maggie Hartley of Hookness, who sailed away from everything she knew." : 'Grandma Margaret, laughing on the pier. For the first time you notice, far behind her, a little boat with a red sail.') },
-    { x: 173, r: 12, label: 'Look out the window', act: () => Dlg.narrate(flag('wentNorth') ? 'The harbour is empty now. The whales have gone north, and the compass on your belt points after them.' : 'The two whales rest in the harbour. The big one glows. The little one is a dark shape beside her, like a shadow.') },
+    { x: 173, r: 12, label: 'Look out the window', act: () => Dlg.narrate(flag('wentNorth') ? 'The harbor is empty now. The whales have gone north, and the compass on your belt points after them.' : 'The two whales rest in the harbor. The big one glows. The little one is a dark shape beside her, like a shadow.') },
     { x: 272, r: 12, label: 'Talk to Grandpa', act: () => c2Ansel() },
     { x: 291, r: 9, label: 'Climb the ladder to the attic', act: () => c2Trunk() },
     { x: 330, r: 10, label: 'Cook fish on the stove', act: cookFish },
@@ -419,7 +419,7 @@ async function c2Trunk() {
   if (!flag('compassFound')) { await Dlg.narrate("Grandpa's old sea trunk. He doesn't like anyone opening it."); return; }
   if (Inv.has('sweater')) { await Dlg.narrate('The trunk is full of old letters, a wedding veil and a pair of very small boots. You close it gently.'); return; }
   await Dlg.narrate('You climb the ladder into the attic and kneel by the old sea trunk. The lid creaks. Inside, it smells of lavender.');
-  await Dlg.narrate("On top, folded neatly: a thick, oily, cream-coloured wool sweater. It's enormous. You pull it on over your raincoat, and it comes down to your knees.");
+  await Dlg.narrate("On top, folded neatly: a thick, oily, cream-colored wool sweater. It's enormous. You pull it on over your raincoat, and it comes down to your knees.");
   Inv.add('sweater'); Sound.sfx('pickup');
   await Dlg.narrate('Underneath the sweater is a photograph you have never seen before.');
   await Dlg.narrate('A girl of about your age, scowling at the camera, in front of a long tin building. Painted on the wall behind her: HOOKNESS CANNERY. HARTLEY & SONS.');
@@ -577,9 +577,9 @@ async function c2Ylva() {
     await Dlg.say('ylva', "North-north-west from Saltmere? From here that points straight at the Narrows. And beyond the Narrows... the Aurora Grotto. If the old stories are true.");
     await Dlg.say('ylva', "My grandmother told me lantern whales used to pass these stacks every spring, heading north through the Narrows to a cave where the northern lights come right down to the sea. That's where the calves get their glow.");
     await Dlg.say('ylva', 'Then, fifty years ago, the old cannery at Hookness closed its weir across the Narrows for good. And the whales stopped coming.');
-    await Dlg.say('you', "There's a lantern calf in Saltmere harbour with no light at all.");
+    await Dlg.say('you', "There's a lantern calf in Saltmere harbor with no light at all.");
     await Dlg.say('ylva', "Then it HAS to get through the Narrows. But that weir is shut tight. Only the old caretaker at Hookness would know how to open it. Oskar. He's grumpy. Very grumpy. Bring biscuits.");
-    await Dlg.say('ylva', "Oh, and could you do me a favour? A storm washed out the sand eels and my puffin chicks are starving. If you catch me three herring, I'll find something to trade you.");
+    await Dlg.say('ylva', "Oh, and could you do me a favor? A storm washed out the sand eels and my puffin chicks are starving. If you catch me three herring, I'll find something to trade you.");
     Sound.sfx('quest');
     return;
   }
@@ -693,7 +693,7 @@ const CANNERY = {
       },
     },
     { x: 626, r: 10, label: 'Read the notice board', act: () => Dlg.narrate('Old notices, curled and yellow. One says: "BY ORDER OF J. HARTLEY. THE WEIR AT THE NARROWS IS CLOSED. FOR GOOD." Someone has drawn a very rude whale on it in pencil.') },
-    { x: 740, r: 10, label: 'Pat the dog', act: () => Dlg.narrate('The big grey dog leans its whole weight against your legs and sighs happily. Its tag says BJORN.') },
+    { x: 740, r: 10, label: 'Pat the dog', act: () => Dlg.narrate('The big gray dog leans its whole weight against your legs and sighs happily. Its tag says BJORN.') },
     { x: 770, label: 'Talk to Oskar', act: () => c2Oskar() },
     { x: 803, r: 10, label: 'Cook fish in the smokehouse', act: cookFish },
     { x: 892, r: 16, label: 'The big boarded-up house', act: () => Dlg.narrate(flag('oskarMet') ? 'The Hartley house. Up in the attic window hangs a faded red curtain. Maggie\'s room.' : 'A big house, its windows boarded up. In the little attic window, a scrap of faded red curtain.') },
@@ -702,7 +702,7 @@ const CANNERY = {
     if (!flag('canneryVisit')) {
       setFlag('canneryVisit');
       await wait(0.5);
-      await Dlg.narrate('Hookness. A rusting cannery, a cold grey shore, and silence. Only one chimney in the whole place is smoking.');
+      await Dlg.narrate('Hookness. A rusting cannery, a cold gray shore, and silence. Only one chimney in the whole place is smoking.');
     }
   },
 };
@@ -710,7 +710,7 @@ const CANNERY = {
 async function c2Oskar() {
   if (!flag('oskarMet')) {
     await Dlg.say('oskar', "Who's that? Boat people. Bah. Bjorn, don't you DARE wag at them.");
-    await Dlg.narrate('The big grey dog wags at you anyway.');
+    await Dlg.narrate('The big gray dog wags at you anyway.');
     await Dlg.say('oskar', 'Nothing to see here. Cannery has been shut for fifty years. Go home.');
     await Dlg.narrate('You hold out the compass.');
     await Dlg.say('oskar', '...Where did you get that?');
@@ -789,7 +789,7 @@ const FLOE = {
         Sound.sfx('chop'); await wait(0.3); Sound.sfx('chop');
         await Dlg.narrate('You chip a little ramp into the ice. The pup wriggles up it, flops across the ice, and slides into the sea with a happy splash.');
         Sound.sfx('splash');
-        await Dlg.narrate('A moment later, a big grey head pops up out of the water beside it. Its mother. She looks at you for a long moment, then they both dive.');
+        await Dlg.narrate('A moment later, a big gray head pops up out of the water beside it. Its mother. She looks at you for a long moment, then they both dive.');
         setFlag('sealFreed');
       },
     },

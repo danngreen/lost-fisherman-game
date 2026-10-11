@@ -327,7 +327,7 @@ const CHAPTER_INFO = {
     label: 'Chapter I: The Lost Fisherman', short: 'Chapter I',
     intro: [
       'Saltmere. Autumn.',
-      'A month ago, your grandfather, Ansel Hale, rowed out of the harbour at dusk.',
+      'A month ago, your grandfather, Ansel Hale, rowed out of the harbor at dusk.',
       'He said he had seen the lights again.',
       'His boat, the Margaret, never came back.',
       'The search boats looked for nine days and found nothing. Not one plank.',

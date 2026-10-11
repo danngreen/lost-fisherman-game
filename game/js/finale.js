@@ -44,7 +44,7 @@ const WhaleScene = {
     await Dlg.narrate('A whale. Longer than the whole Saltmere pier. Ancient and barnacled and glowing, every spot along her back pulsing softly, like breathing.');
     Sound.whale(0.3);
     await Dlg.say('anselR', "There she is. Hello, old girl. Easy now. Easy. We've come to help, like I promised.");
-    await Dlg.narrate('Wrapped around her tail and over her back is a tangle of old grey net, thick as rope, biting into her skin.');
+    await Dlg.narrate('Wrapped around her tail and over her back is a tangle of old gray net, thick as rope, biting into her skin.');
     await Dlg.say('anselR', "Here, take my knife. I'll keep the boat steady. When a knot lights up, press the arrow key it shows, and cut. Cut her free, little gull!");
     this.next();
     await new Promise(res => { this.onDone = res; });

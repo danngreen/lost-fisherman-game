@@ -9,7 +9,7 @@ Object.assign(ITEMS, {
   letters: { name: "Maggie's Letters", type: 'key', desc: 'Fifty letters tied with a red ribbon, every one addressed "Toby", none of them ever posted.' },
   redsail: { name: 'The Red Sail', type: 'key', desc: 'A small sail of red canvas, sewn by hand fifty years ago. Folded so carefully it still has sharp creases.' },
   pimmap: { name: "Pim's Map", type: 'key', desc: 'A crayon map of the Skerries, showing the safe channels between the rocks. Fewer rocks on Skerries voyages.' },
-  efeather: { name: 'Eider Feather', type: 'trade', desc: 'A soft, curly grey feather. Nell would love this.' },
+  efeather: { name: 'Eider Feather', type: 'trade', desc: 'A soft, curly gray feather. Nell would love this.' },
   smoked: { name: 'Smoked Fish', type: 'food', food: 1, desc: "Ingrid's smoked fish. Food for one leg of a voyage." },
   countbook: { name: "Sigrid's Puffin Book", type: 'key', desc: 'Fifty years of puffin counts. Near the back, in small neat writing: "3,002 puffins. Counted by M. Hartley, aged 12."' },
   cup: { name: 'Regatta Cup', type: 'key', desc: 'A small silver cup engraved MIDSUMMER REGATTA. Somebody has scratched "& ADMIRAL" on the bottom.' },
@@ -198,7 +198,7 @@ const SEAL = {
     boatObject(36, 'seal'),
     anselObject(92, 'seal'),
     ...sketchSpots('seal'),
-    { x: 160, r: 14, label: 'Look at the seals', act: () => Dlg.narrate('A big grey seal lifts its head, looks at you with enormous wet eyes, and sneezes. Toby would probably have called this one Duchess.') },
+    { x: 160, r: 14, label: 'Look at the seals', act: () => Dlg.narrate('A big gray seal lifts its head, looks at you with enormous wet eyes, and sneezes. Toby would probably have called this one Duchess.') },
     { x: 412, label: 'Talk to Pim', act: () => c3Pim() },
     { x: 440, r: 10, label: "Pim's raft", act: () => Dlg.narrate('Five planks, two barrels, a broom handle for a mast and a pillowcase for a sail. It is the most dangerous boat you have ever seen. You love it.') },
     { x: 520, r: 10, label: 'Fish', act: sc => fishHere(sc, 520, 240, 1) },
@@ -207,7 +207,7 @@ const SEAL = {
     if (!flag('seal3')) {
       setFlag('seal3');
       await wait(0.5);
-      await Dlg.narrate('Seal Skerry. Across the shallow water lies a long grey rock with a head and two ears, exactly like a big dog asleep in the sun. It is covered in seals.');
+      await Dlg.narrate('Seal Skerry. Across the shallow water lies a long gray rock with a head and two ears, exactly like a big dog asleep in the sun. It is covered in seals.');
     }
   },
 };
@@ -224,7 +224,7 @@ async function c3Pim() {
     if (Inv.has('lumpfish')) {
       setFlag('pimMap'); Inv.remove('lumpfish');
       await Dlg.narrate('You show Pim the lumpfish. It looks very surprised. So does Pim.');
-      await Dlg.say('pim', "IT'S SO ROUND! It looks like a potato that heard a rumour! Okay, okay, a deal is a deal.");
+      await Dlg.say('pim', "IT'S SO ROUND! It looks like a potato! Okay, okay, a deal is a deal.");
       Inv.add('pimmap'); Sound.sfx('quest');
       await Dlg.say('pim', "The safe channels are in blue. The rocks are in black. The sea monster is in green. ...There isn't really a sea monster. Probably.");
       await Dlg.narrate("With Pim's map, you'll meet far fewer rocks sailing in the Skerries.");
@@ -254,7 +254,7 @@ const EIDER = {
     paintTerrain(c, 60, 560, g, (x, d, y) => x > 90 && x < 510 ? MAT.grass(x, d, y) : MAT.mossrock(x, d, y));
     drawTurfHouse(c, 230, this.ground(255), 50, 34);
     sc.wins = [{ x: 236, y: this.ground(255) - 26, w: 10, h: 8 }, { x: 264, y: this.ground(255) - 26, w: 10, h: 8 }];
-    // drying racks hung with grey eider down
+    // drying racks hung with gray eider down
     for (const rx of [300, 330]) {
       const gy = this.ground(rx);
       rect(c, rx, gy - 18, 2, 18, '#6a4a30'); rect(c, rx + 22, gy - 18, 2, 18, '#6a4a30'); rect(c, rx, gy - 18, 24, 1, '#6a4a30');
@@ -289,7 +289,7 @@ const EIDER = {
     { x: 212, label: 'Talk to Ingrid', act: () => c3Ingrid() },
     { x: 255, r: 10, label: 'The turf house', act: () => Dlg.narrate("A little house with grass growing on its roof. A duck is sitting on the roof, on a nest, looking extremely pleased with itself.") },
     { x: 400, r: 30, label: 'Watch the eider ducks', act: () => Dlg.narrate('The eider ducks say "ah-OOO, ah-OOO," like old ladies hearing some very interesting gossip. The drakes are smart black and white, with pale green necks.') },
-    { x: 486, r: 8, label: 'Pick up a feather', when: () => !flag('efeatherGot'), act: async () => { setFlag('efeatherGot'); Inv.add('efeather'); Sound.sfx('pickup'); await Dlg.narrate('A curly grey eider feather, so soft you can barely feel it. Nell would love this.'); } },
+    { x: 486, r: 8, label: 'Pick up a feather', when: () => !flag('efeatherGot'), act: async () => { setFlag('efeatherGot'); Inv.add('efeather'); Sound.sfx('pickup'); await Dlg.narrate('A curly gray eider feather, so soft you can barely feel it. Nell would love this.'); } },
     { x: 520, r: 10, label: 'Fish', act: sc => fishHere(sc, 520, 240, 1) },
   ],
   async onEnter() {
@@ -446,7 +446,7 @@ async function c3BoatShed() {
 
 async function c3Toby() {
   if (!flag('tobyMet')) {
-    await Dlg.narrate('A man with a grey beard puts down his hammer and comes stamping over from the boat shed.');
+    await Dlg.narrate('A man with a gray beard puts down his hammer and comes stamping over from the boat shed.');
     await Dlg.say('tobyQ', "Oi! This is a PRIVATE rock! Can't you read? It says GO AWAY. On the door. In capitals.");
     await Dlg.say('tobyQ', 'Admiral! See them off!');
     await Dlg.narrate('The goat trots over, looks at you, and starts eating your sleeve.');
@@ -474,7 +474,7 @@ async function c3Toby() {
     await Dlg.narrate('The door opens a crack. A nose sniffs the air. Then the door flies open.');
     Inv.remove('coffee'); setFlag('tobyCoffee'); Sound.sfx('door');
     await Dlg.say('tobyQ', "Is that COFFEE?");
-    await Dlg.narrate("He snatches the bag, sniffs it, and closes his eyes like a man hearing his favourite song. Admiral the goat trots out after him.");
+    await Dlg.narrate("He snatches the bag, sniffs it, and closes his eyes like a man hearing his favorite song. Admiral the goat trots out after him.");
     await Dlg.say('tobyQ', "...Fine. ONE cup. Sit on the bench. Don't touch anything. Don't let the goat eat the bench.");
     await Dlg.narrate('Ten minutes later you are all sitting outside the hut in the sun, holding chipped mugs. The coffee is so strong your eyebrows tingle.');
     await Dlg.say('tobyQ', "So. What do you want?");
@@ -490,7 +490,7 @@ async function c3Toby() {
     await Dlg.say('toby', '"Was."');
     await Dlg.say('ansel', "She was my wife, for nearly fifty years. I'm sorry, Toby. We lost her a few winters ago.");
     await Dlg.narrate('Toby puts his mug down very carefully on the bench. The goat leans against his legs.');
-    await Dlg.say('toby', "I was nine. The night she took the gear out of the winch, I saw her creep home with it under her coat. I followed her up to the attic in my pyjamas.");
+    await Dlg.say('toby', "I was nine. The night she took the gear out of the winch, I saw her creep home with it under her coat. I followed her up to the attic in my pajamas.");
     await Dlg.say('toby', "In the morning Father stood in the kitchen and asked me where it was. He was so angry. And I... I told him. I told the truth, like she always said to.");
     await Dlg.say('toby', "He shut the weir by hand, with ropes and twenty men. And that night she sailed away in the Wren. She looked back at me from the boat, just once. And I never saw her again.");
     await Dlg.say('toby', "She never wrote. Not a single letter, in fifty years. Why would she? I was the one who told.");
@@ -525,7 +525,7 @@ async function c3GiveLetters() {
   await Dlg.say('toby', "I've been building that boat for fifty years. I never could finish her. But the Wren is finished, isn't she? I saw her sail in.");
   await Dlg.say('toby', "Put it on the Wren. Maggie would want her red sail back.");
   Inv.add('redsail'); Sound.sfx('quest');
-  await Dlg.say('ansel', "Toby. It's Midsummer in two days. There's a regatta in Saltmere, and a bench by the harbour with room for one more grumpy old man. Come home with us.");
+  await Dlg.say('ansel', "Toby. It's Midsummer in two days. There's a regatta in Saltmere, and a bench by the harbor with room for one more grumpy old man. Come home with us.");
   await Dlg.say('toby', "...Saltmere. I've never been south of Kettle Point.");
   await Dlg.say('toby', "Admiral comes too. He's never been anywhere either.");
   setFlag('tobySouth'); setFlag('tobyAboard');
@@ -539,15 +539,15 @@ async function c3TobyArrives() {
   S.f.tobyAboard = 0;
   setFlag('tobyArrived');
   await wait(0.6);
-  await Dlg.narrate('The Wren sails into Saltmere harbour with three people aboard, and a goat standing on the bow like a figurehead.');
-  await Dlg.narrate('On the bench by the harbour, an old man in a red hat stands up so fast he drops his sandwich. Bjorn eats it.');
+  await Dlg.narrate('The Wren sails into Saltmere harbor with three people aboard, and a goat standing on the bow like a figurehead.');
+  await Dlg.narrate('On the bench by the harbor, an old man in a red hat stands up so fast he drops his sandwich. Bjorn eats it.');
   await Dlg.say('oskar', "...Toby? Little TOBY? You're OLD!");
   await Dlg.say('toby', "So are you, Oskar. You look like a walrus.");
   await Dlg.say('oskar', "I've ALWAYS looked like a walrus.");
   await Dlg.narrate('They hug. It goes on for quite a long time. Finn pretends to be very interested in a seagull.');
   await Dlg.say('bo', "Is that a red sail? Give it here. Let's see her dressed properly.");
   Inv.remove('redsail'); setFlag('redSail');
-  await Dlg.narrate('Bo bends the red sail onto the Wren\'s new mast, and the whole harbour goes quiet for a moment as it fills with wind. Red, against the blue sea. Just like the old photograph.');
+  await Dlg.narrate('Bo bends the red sail onto the Wren\'s new mast, and the whole harbor goes quiet for a moment as it fills with wind. Red, against the blue sea. Just like the old photograph.');
   await Dlg.say('ansel', "There she is. That's my Maggie's boat.");
   await Dlg.say('greta', "Well, don't just stand there. The Regatta is tomorrow evening. Is the Wren entered or not?");
   await Dlg.say('toby', "She's entered. And she's going to win.");
@@ -591,7 +591,7 @@ async function c3RaceEnd(place) {
   if (place === 1) {
     await Dlg.narrate('The Wren shoots across the finish line first, her red sail full, with the whole village roaring on the pier.');
     await Dlg.say('toby', "WE WON! Admiral, we WON!");
-    await Dlg.say('greta', "Well. I suppose the Harbourmaster can't win EVERY year. ...Congratulations, Captain.");
+    await Dlg.say('greta', "Well. I suppose the Harbormaster can't win EVERY year. ...Congratulations, Captain.");
     Inv.add('cup'); Sound.sfx('quest');
     S.f.racePlace = 1;
   } else {
@@ -613,8 +613,8 @@ async function c3Bonfire() {
   Game.scenes.c3_village.updateCam(true);
   await Game.fadeTo(0, 1);
   Sound.setMood('wonder');
-  await Dlg.narrate("That night, there's a bonfire on the harbour. Rosa brings saffron buns, Tam brings his halibut, and the whole village sits round the fire as the sky turns pale green and never quite gets dark.");
-  await Dlg.narrate('Then, out past the harbour wall, the sea begins to glow.');
+  await Dlg.narrate("That night, there's a bonfire on the harbor. Rosa brings saffron buns, Tam brings his halibut, and the whole village sits round the fire as the sky turns pale green and never quite gets dark.");
+  await Dlg.narrate('Then, out past the harbor wall, the sea begins to glow.');
   Sound.whale(0.25);
   await wait(1);
   await Dlg.narrate("Two shapes rise in the water. One very big, glowing green and blue. And one small, glowing gold.");
@@ -639,7 +639,7 @@ async function c3Ending() {
 
 function c3RegattaMid(w, sc, cam, t) {
   if (flag('bonfire')) drawBonfire(w, 980 - cam, 222, t);
-  // Admiral wanders the harbour, and settles at Toby's feet for the bonfire
+  // Admiral wanders the harbor, and settles at Toby's feet for the bonfire
   if (flag('bonfire')) { drawGoat(w, 1040 - cam, 222, t, true, false); return; }
   const gx = 470 + Math.sin(t * 0.25) * 30;
   drawGoat(w, gx - cam, 222, t, Math.cos(t * 0.25) < 0, Math.sin(t * 0.25) > 0.7);
@@ -697,7 +697,7 @@ async function c3PflPick(sc, i) {
   if (p.carry.length >= PFL_BOX) { await Dlg.narrate('Your box is full! Take these three to the cliff edge first.'); return; }
   p.carry.push(i);
   Sound.sfx('peep');
-  const lines = ['A fluffy grey puffling, ' + PUFFLINGS[i].where + '. It glares at you, then lets you pick it up.', 'You scoop up the puffling ' + PUFFLINGS[i].where + '. It is mostly fluff and indignation.', 'Found one ' + PUFFLINGS[i].where + '! It goes into the box with a small offended peep.'];
+  const lines = ['A fluffy gray puffling, ' + PUFFLINGS[i].where + '. It glares at you, then lets you pick it up.', 'You scoop up the puffling ' + PUFFLINGS[i].where + '. It is mostly fluff and indignation.', 'Found one ' + PUFFLINGS[i].where + '! It goes into the box with a small offended peep.'];
   Toast.show('Puffling in the box (' + p.carry.length + '/' + PFL_BOX + ')', 'feather');
   if (!S.f.pflTip) { S.f.pflTip = 1; await Dlg.narrate(lines[i % lines.length]); }
 }
@@ -793,8 +793,8 @@ const EPILOGUE3 = {
   cardList: [
     'Toby stayed in Saltmere all summer. On his first day, Admiral ate Greta\'s hat. On his second day, he ate her other hat.',
     'In the autumn, Bo helped Toby finish his boat at last. Fifty years in the building, and she floats like a duck. He named her Maggie.',
-    'The Wren sails out of Saltmere harbour most evenings now, under her red sail. Sometimes Grandpa is at the tiller, and sometimes Toby is, and they argue about it the whole way out and the whole way back.',
-    'And on the first clear night of every summer, two old men sit on the bench by the harbour and read a letter out loud, very slowly, to anyone who will listen.',
+    'The Wren sails out of Saltmere harbor most evenings now, under her red sail. Sometimes Grandpa is at the tiller, and sometimes Toby is, and they argue about it the whole way out and the whole way back.',
+    'And on the first clear night of every summer, two old men sit on the bench by the harbor and read a letter out loud, very slowly, to anyone who will listen.',
     'Everyone listens.',
   ],
   endTitle: 'THE END OF CHAPTER III',
@@ -868,7 +868,7 @@ function registerChapter3b() {
     { x: 446, r: 8, label: 'Talk to Toby', when: () => flag('tobyArrived') && !flag('bonfire'), act: () => c3TobySaltmere() },
     { x: 1204, r: 12, label: 'Start the Regatta', when: () => flag('regattaDay') && !flag('raced'), act: () => c3StartRace() },
   );
-  // Greta at the start line takes over from Greta at the harbour office on regatta day
+  // Greta at the start line takes over from Greta at the harbor office on regatta day
   const greta = C3_VILLAGE.npcs.find(n => n.id === 'greta' && n.x === 856);
   const gw = greta.when; greta.when = () => gw() && !flag('regattaDay');
   // sleeping after Toby arrives brings Midsummer Day
